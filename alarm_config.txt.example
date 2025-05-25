@@ -1,0 +1,31 @@
+# Kiosk Clock Alarm Configuration
+# Copy this file to alarm_config.txt and customize as needed
+#
+# List alarm times in HH:MM format (24-hour), one per line
+# Lines starting with # are comments and will be ignored
+
+# Morning alarms
+07:00
+07:30
+08:00
+
+# Afternoon reminder
+12:00
+
+# Evening alarms
+18:00
+20:00
+
+# Optional: Display power management
+# Uncomment and modify the times below to automatically
+# turn the display off and on at specific times
+#
+# DISPLAY_OFF=23:00
+# DISPLAY_ON=07:00
+
+# Notes:
+# - Times are in 24-hour format (00:00 to 23:59)
+# - Alarms will only fire once per day
+# - The display will show the first 3 alarm times
+# - Make sure you have an alarm.wav file for alarm sounds
+# - Display power management works on Raspberry Pi and Linux systems 

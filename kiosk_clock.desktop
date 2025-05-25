@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=Kiosk Clock
+Exec=/bin/bash "/home/lielu/projects/kiosk/start_kiosk_clock.sh"
