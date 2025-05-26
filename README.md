@@ -145,14 +145,20 @@ kiosk-clock/
    sudo apt-get install aplay mpg123 espeak
    ```
 
-2. **Auto-start on boot** (create systemd service)
+2. **Install emoji fonts** (for Discord emoji display)
+   ```bash
+   sudo apt install fonts-noto-color-emoji
+   ```
+   *This enables proper display of emojis in Discord messages. After installation, restart the application.*
+
+3. **Auto-start on boot** (create systemd service)
    ```bash
    sudo cp kiosk_clock.service /etc/systemd/system/
    sudo systemctl enable kiosk_clock.service
    sudo systemctl start kiosk_clock.service
    ```
 
-3. **Configure audio output**
+4. **Configure audio output**
    ```bash
    sudo raspi-config
    # Navigate to System Options > Audio > Select HDMI/Headphones
