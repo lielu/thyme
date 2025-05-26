@@ -162,6 +162,7 @@ cython_debug/
 # Google API credentials and tokens
 credentials.json
 token.pickle
+discord_token.txt
 
 # User configuration (contains sensitive data)
 alarm_config.txt

@@ -21,7 +21,7 @@ from config import (
     APP_NAME, SCREEN_FULLSCREEN, HIDE_CURSOR, BACKGROUND_COLOR,
     CLOCK_FONT, DATE_FONT, ALARMS_FONT, EVENTS_FONT, WEATHER_FONT,
     UI_MARGIN, EVENTS_REFRESH_INTERVAL, WEATHER_UPDATE_INTERVAL,
-    TTS_DELAY_AFTER_ALARM
+    TTS_DELAY_AFTER_ALARM, DISCORD_UPDATE_INTERVAL, user_config
 )
 from utils import setup_logging, get_screen_dimensions, create_shadow_text
 from calendar_integration import CalendarManager
@@ -29,6 +29,7 @@ from audio_manager import AudioManager
 from alarm_manager import AlarmManager
 from weather_manager import WeatherManager
 from background_manager import BackgroundManager
+from discord_manager import DiscordManager
 
 
 class KioskClockApp:
@@ -81,6 +82,7 @@ class KioskClockApp:
         self.background_manager = BackgroundManager(
             self.canvas, self.screen_width, self.screen_height
         )
+        self.discord_manager = DiscordManager()
         
         # UI elements (canvas item IDs)
         self.clock_text: Optional[int] = None
@@ -95,6 +97,8 @@ class KioskClockApp:
         self.weather_shadow: Optional[int] = None
         self.weather_icon_item: Optional[int] = None
         self.weather_icon_image: Optional[ImageTk.PhotoImage] = None
+        self.discord_text: Optional[int] = None
+        self.discord_shadow: Optional[int] = None
         
         # Visual alarm state
         self.alarm_message_item: Optional[int] = None
@@ -146,6 +150,15 @@ class KioskClockApp:
             anchor='nw'
         )
         
+        # Discord (middle-left)
+        self.discord_text, self.discord_shadow = create_shadow_text(
+            self.canvas,
+            UI_MARGIN,
+            self.screen_height // 2 - 50,  # Middle of screen
+            font=EVENTS_FONT,  # Same font as events
+            anchor='nw'
+        )
+        
         # Events (bottom-left)
         self.events_text, self.events_shadow = create_shadow_text(
             self.canvas,
@@ -180,6 +193,7 @@ class KioskClockApp:
         self._update_alarms()
         self._update_events()
         self._update_weather()
+        self._update_discord()
         self._check_display_times()
     
     def _setup_event_handlers(self) -> None:
@@ -275,6 +289,24 @@ class KioskClockApp:
         # Schedule next update
         self.root.after(WEATHER_UPDATE_INTERVAL, self._update_weather)
     
+    def _update_discord(self) -> None:
+        """Update discord display."""
+        try:
+            if not self.display_hidden and user_config.discord_token and user_config.discord_channel_id:
+                discord_text = self.discord_manager.get_messages_display_text(user_config.discord_channel_id)
+                self.canvas.itemconfig(self.discord_text, text=discord_text)
+                self.canvas.itemconfig(self.discord_shadow, text=discord_text)
+            elif not (user_config.discord_token and user_config.discord_channel_id):
+                # Show disabled message if discord not configured
+                discord_text = "Discord:\n(not configured)"
+                self.canvas.itemconfig(self.discord_text, text=discord_text)
+                self.canvas.itemconfig(self.discord_shadow, text=discord_text)
+        except Exception as e:
+            self.logger.error(f"Error updating discord: {e}")
+        
+        # Schedule next update
+        self.root.after(DISCORD_UPDATE_INTERVAL, self._update_discord)
+    
     def _check_display_times(self) -> None:
         """Check if display should be hidden based on configured times."""
         try:
@@ -298,7 +330,8 @@ class KioskClockApp:
         # Hide text elements
         for item in [self.clock_text, self.clock_shadow, self.date_text, self.date_shadow,
                     self.alarms_text, self.alarms_shadow, self.events_text, self.events_shadow,
-                    self.weather_text, self.weather_shadow, self.weather_icon_item]:
+                    self.weather_text, self.weather_shadow, self.weather_icon_item,
+                    self.discord_text, self.discord_shadow]:
             if item:
                 self.canvas.itemconfig(item, state='hidden')
         
@@ -313,7 +346,8 @@ class KioskClockApp:
         # Show text elements
         for item in [self.clock_text, self.clock_shadow, self.date_text, self.date_shadow,
                     self.alarms_text, self.alarms_shadow, self.events_text, self.events_shadow,
-                    self.weather_text, self.weather_shadow, self.weather_icon_item]:
+                    self.weather_text, self.weather_shadow, self.weather_icon_item,
+                    self.discord_text, self.discord_shadow]:
             if item:
                 self.canvas.itemconfig(item, state='normal')
         
@@ -409,6 +443,9 @@ class KioskClockApp:
             
             # Clean up audio
             self.audio_manager.cleanup()
+            
+            # Clean up Discord connection
+            self.discord_manager.cleanup()
             
             # Hide alarm visual
             self._hide_alarm_visual()

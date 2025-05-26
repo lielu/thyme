@@ -15,6 +15,7 @@ A beautiful, full-screen digital clock application with Google Calendar integrat
 - **📅 Google Calendar Integration**: Shows your upcoming events with smart formatting
 - **⏰ Configurable Alarms**: Visual and audio notifications with TTS announcements
 - **🌤️ Weather Display**: Current weather conditions with beautiful icons
+- **💬 Discord Integration**: Shows recent messages from Discord channels
 - **🖼️ Dynamic Backgrounds**: Rotating images with smooth fade transitions
 - **🎵 Text-to-Speech**: Announces events when alarms trigger
 - **💻 Cross-Platform**: Works on Windows, macOS, and Linux
@@ -50,13 +51,20 @@ A beautiful, full-screen digital clock application with Google Calendar integrat
    - Create OAuth 2.0 credentials
    - Download credentials as `credentials.json` in the project directory
 
-4. **Configure alarms** (optional)
+4. **Set up Discord Integration** (optional, refer to [discord_setup_guide](discord_setup_guide.md))
+   - Create a Discord bot at [Discord Developer Portal](https://discord.com/developers/applications)
+   - Enable Message Content Intent for the bot
+   - Add the bot to your Discord server with read permissions
+   - Get the channel ID from Discord (enable Developer Mode)
+   - Set environment variables with bot token and channel ID
+
+5. **Configure alarms** (optional)
    ```bash
    cp alarm_config.txt.example alarm_config.txt
    # Edit alarm_config.txt with your preferred alarm times
    ```
 
-5. **Run the application**
+6. **Run the application**
    ```bash
    ./start_kiosk_clock.sh
    # OR
@@ -78,6 +86,10 @@ export KIOSK_LATITUDE="32.7767"
 export KIOSK_LONGITUDE="-96.7970"
 export KIOSK_TIMEZONE="America/Chicago"
 export KIOSK_TEMP_UNIT="fahrenheit"  # or "celsius"
+
+# Discord integration (optional)
+export KIOSK_DISCORD_TOKEN="your_bot_token_here"
+export KIOSK_DISCORD_CHANNEL_ID="your_channel_id_here"
 ```
 
 ### Alarm Configuration

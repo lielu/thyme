@@ -30,6 +30,11 @@ CALENDAR_SCOPES = ['https://www.googleapis.com/auth/calendar.readonly']
 DEFAULT_CALENDAR_ID = 'primary'  # Use 'primary' for main calendar
 EVENTS_REFRESH_INTERVAL = 10 * 1000  # 10 seconds in milliseconds
 
+# Discord Configuration
+DISCORD_UPDATE_INTERVAL = 10 * 1000  # 10 seconds in milliseconds
+KIOSK_DISCORD_TOKEN = '<discord_token>'
+KIOSK_DISCORD_CHANNEL_ID = '<discord_channel_id>'
+
 # UI Configuration
 SCREEN_FULLSCREEN = True
 HIDE_CURSOR = True
@@ -90,6 +95,8 @@ class UserConfig:
         self.longitude = float(os.getenv('KIOSK_LONGITUDE', DEFAULT_LONGITUDE))
         self.timezone = os.getenv('KIOSK_TIMEZONE', 'America/Chicago')
         self.temperature_unit = os.getenv('KIOSK_TEMP_UNIT', 'fahrenheit')
+        self.discord_token = os.getenv('KIOSK_DISCORD_TOKEN', KIOSK_DISCORD_TOKEN)  # Discord bot token
+        self.discord_channel_id = os.getenv('KIOSK_DISCORD_CHANNEL_ID', KIOSK_DISCORD_CHANNEL_ID)  # Discord channel ID
         
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""
@@ -98,7 +105,9 @@ class UserConfig:
             'latitude': self.latitude,
             'longitude': self.longitude,
             'timezone': self.timezone,
-            'temperature_unit': self.temperature_unit
+            'temperature_unit': self.temperature_unit,
+            'discord_token': self.discord_token,
+            'discord_channel_id': self.discord_channel_id
         }
 
 # Global configuration instance
