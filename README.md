@@ -73,9 +73,57 @@ A beautiful, full-screen digital clock application with Google Calendar integrat
 
 ## 🛠️ Configuration
 
-### Environment Variables
+### Settings Page (Recommended)
 
-Configure the application using environment variables:
+Access the graphical settings page in two ways:
+- **Click the gear icon** in the top-right corner of the display
+- Press **F6** while the kiosk clock is running
+
+This provides an easy way to configure:
+
+- **Calendar Settings**: Google Calendar ID
+- **Discord Integration**: Bot token and channel ID  
+- **Weather Settings**: Location (latitude/longitude), timezone, temperature units
+- **Alarms**: Add, edit, and delete alarm times with a user-friendly interface
+- **Display Management**: Automatic screen on/off times
+
+The settings page includes helpful tooltips, validation, and the ability to automatically detect your current location for weather settings.
+
+### Configuration File (alarm_config.txt)
+
+All settings are stored in `alarm_config.txt` for easy manual editing and version control:
+
+```bash
+# Kiosk Clock Configuration
+# This file contains all settings for the Kiosk Clock application
+
+# Google Calendar Settings
+CALENDAR_ID=your-email@gmail.com
+
+# Weather Settings
+LATITUDE=32.7767
+LONGITUDE=-96.7970
+TIMEZONE=America/Chicago
+TEMP_UNIT=fahrenheit
+
+# Discord Integration Settings
+DISCORD_TOKEN=your_bot_token_here
+DISCORD_CHANNEL_ID=your_channel_id_here
+
+# Display Power Management
+DISPLAY_OFF=23:00
+DISPLAY_ON=07:00
+
+# Alarm Times (HH:MM format, 24-hour)
+07:00
+07:30
+12:00
+18:00
+```
+
+### Environment Variables (Alternative)
+
+You can also configure the application using environment variables, which will override settings in `alarm_config.txt`:
 
 ```bash
 # Calendar settings
@@ -92,21 +140,12 @@ export KIOSK_DISCORD_TOKEN="your_bot_token_here"
 export KIOSK_DISCORD_CHANNEL_ID="your_channel_id_here"
 ```
 
-### Alarm Configuration
+### Legacy Configuration
 
-Create `alarm_config.txt` to set up alarms and display scheduling:
-
-```
-# Alarm times (24-hour format)
-07:00
-07:30
-12:00
-18:00
-
-# Optional: Display power management
-DISPLAY_OFF=23:00
-DISPLAY_ON=07:00
-```
+For backwards compatibility, the application also reads from:
+- Environment variables (takes precedence)
+- Old `alarm_config.txt` format (alarms and display times only)
+- `.env` files (if present)
 
 ### Background Images
 
@@ -226,6 +265,8 @@ The application includes a script to download Bing daily wallpapers:
 python kiosk_clock_app.py
 # Press ESC to exit
 # Press F5 to reload configuration
+# Press F6 to open settings page
+# Or click the gear icon in the top-right corner
 ```
 
 ### Code Structure
@@ -275,6 +316,12 @@ Logs are written to `logs/kiosk_clock_YYYYMMDD.log` with rotation:
 - Place images in `backgrounds/` directory
 - Check image file formats (JPG, PNG, GIF, BMP)
 - Verify file permissions
+
+**Settings window not opening on Raspberry Pi**
+- Error: "grab failed: window not viewable" 
+- This issue has been fixed with delayed modal setup
+- Settings window will still work even if modal grab fails
+- Use test script: `python3 test_settings_rpi.py` to verify
 
 ### Debug Mode
 

@@ -85,19 +85,68 @@ TTS_DELAY_AFTER_ALARM = 2000  # milliseconds
 # Browser Configuration (for Google OAuth)
 os.environ['BROWSER'] = '/usr/bin/chromium'
 
+def _load_config_from_file() -> Dict[str, str]:
+    """Load configuration from alarm_config.txt file."""
+    config = {}
+    
+    try:
+        if os.path.exists(ALARM_CONFIG_FILE):
+            with open(ALARM_CONFIG_FILE, 'r') as f:
+                lines = f.readlines()
+                for line in lines:
+                    line = line.strip()
+                    if line.startswith('#') or not line or '=' not in line:
+                        continue
+                    
+                    # Handle key=value settings
+                    key, value = line.split('=', 1)
+                    if key == 'CALENDAR_ID':
+                        config['calendar_id'] = value
+                    elif key == 'LATITUDE':
+                        config['latitude'] = value
+                    elif key == 'LONGITUDE':
+                        config['longitude'] = value
+                    elif key == 'TIMEZONE':
+                        config['timezone'] = value
+                    elif key == 'TEMP_UNIT':
+                        config['temp_unit'] = value
+                    elif key == 'DISCORD_TOKEN':
+                        config['discord_token'] = value
+                    elif key == 'DISCORD_CHANNEL_ID':
+                        config['discord_channel_id'] = value
+    except Exception as e:
+        print(f"Warning: Error loading config from {ALARM_CONFIG_FILE}: {e}")
+    
+    return config
+
 # User Customizable Settings (can be overridden)
 class UserConfig:
     """User customizable configuration settings."""
     
     def __init__(self):
-        self.calendar_id = os.getenv('KIOSK_CALENDAR_ID', DEFAULT_CALENDAR_ID)
-        self.latitude = float(os.getenv('KIOSK_LATITUDE', DEFAULT_LATITUDE))
-        self.longitude = float(os.getenv('KIOSK_LONGITUDE', DEFAULT_LONGITUDE))
-        self.timezone = os.getenv('KIOSK_TIMEZONE', 'America/Chicago')
-        self.temperature_unit = os.getenv('KIOSK_TEMP_UNIT', 'fahrenheit')
-        self.discord_token = os.getenv('KIOSK_DISCORD_TOKEN', KIOSK_DISCORD_TOKEN)  # Discord bot token
-        self.discord_channel_id = os.getenv('KIOSK_DISCORD_CHANNEL_ID', KIOSK_DISCORD_CHANNEL_ID)  # Discord channel ID
+        # Load from alarm_config.txt first
+        file_config = _load_config_from_file()
         
+        # Use config file values if available, otherwise fall back to environment variables, then defaults
+        self.calendar_id = file_config.get('calendar_id') or os.getenv('KIOSK_CALENDAR_ID', DEFAULT_CALENDAR_ID)
+        
+        latitude_str = file_config.get('latitude') or os.getenv('KIOSK_LATITUDE', str(DEFAULT_LATITUDE))
+        longitude_str = file_config.get('longitude') or os.getenv('KIOSK_LONGITUDE', str(DEFAULT_LONGITUDE))
+        
+        try:
+            self.latitude = float(latitude_str)
+            self.longitude = float(longitude_str)
+        except (ValueError, TypeError):
+            self.latitude = DEFAULT_LATITUDE
+            self.longitude = DEFAULT_LONGITUDE
+            
+        self.timezone = file_config.get('timezone') or os.getenv('KIOSK_TIMEZONE', 'America/Chicago')
+        self.temperature_unit = file_config.get('temp_unit') or os.getenv('KIOSK_TEMP_UNIT', 'fahrenheit')
+        
+        # Discord settings from config file first, then environment variables
+        self.discord_token = file_config.get('discord_token') or os.getenv('KIOSK_DISCORD_TOKEN', KIOSK_DISCORD_TOKEN)
+        self.discord_channel_id = file_config.get('discord_channel_id') or os.getenv('KIOSK_DISCORD_CHANNEL_ID', KIOSK_DISCORD_CHANNEL_ID)
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""
         return {
@@ -109,6 +158,10 @@ class UserConfig:
             'discord_token': self.discord_token,
             'discord_channel_id': self.discord_channel_id
         }
+    
+    def reload(self):
+        """Reload configuration from alarm_config.txt and environment variables."""
+        self.__init__()
 
 # Global configuration instance
 user_config = UserConfig() 

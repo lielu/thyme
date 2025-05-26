@@ -13,6 +13,7 @@ import time
 import datetime
 import atexit
 import logging
+import math
 from typing import Optional
 from PIL import ImageTk
 
@@ -30,6 +31,7 @@ from alarm_manager import AlarmManager
 from weather_manager import WeatherManager
 from background_manager import BackgroundManager
 from discord_manager import DiscordManager
+from settings_manager import SettingsManager
 
 
 class KioskClockApp:
@@ -83,6 +85,7 @@ class KioskClockApp:
             self.canvas, self.screen_width, self.screen_height
         )
         self.discord_manager = DiscordManager()
+        self.settings_manager = SettingsManager(self.root)
         
         # UI elements (canvas item IDs)
         self.clock_text: Optional[int] = None
@@ -99,6 +102,9 @@ class KioskClockApp:
         self.weather_icon_image: Optional[ImageTk.PhotoImage] = None
         self.discord_text: Optional[int] = None
         self.discord_shadow: Optional[int] = None
+        
+        # Settings icon
+        self.settings_icon_items: Optional[list] = None
         
         # Visual alarm state
         self.alarm_message_item: Optional[int] = None
@@ -176,6 +182,81 @@ class KioskClockApp:
             font=WEATHER_FONT,
             anchor='se'
         )
+        
+        # Settings icon (top-right, below date)
+        self._create_settings_icon()
+    
+    def _create_settings_icon(self):
+        """Create a clickable settings gear icon."""
+        # Position: top-right, below the date
+        icon_x = self.screen_width - UI_MARGIN - 30  # 30px from right edge
+        icon_y = UI_MARGIN + 180  # Below date text
+        icon_size = 24  # Icon diameter
+        
+        # Create semi-transparent background circle
+        bg_circle = self.canvas.create_oval(
+            icon_x - icon_size//2 - 4, icon_y - icon_size//2 - 4,
+            icon_x + icon_size//2 + 4, icon_y + icon_size//2 + 4,
+            fill='#000000', outline='', stipple='gray50'
+        )
+        
+        # Create gear icon using canvas drawing
+        gear_parts = []
+        
+        # Main circle
+        main_circle = self.canvas.create_oval(
+            icon_x - 8, icon_y - 8,
+            icon_x + 8, icon_y + 8,
+            outline='white', width=2, fill=''
+        )
+        gear_parts.append(main_circle)
+        
+        # Center hole
+        center_hole = self.canvas.create_oval(
+            icon_x - 3, icon_y - 3,
+            icon_x + 3, icon_y + 3,
+            outline='white', width=1, fill=''
+        )
+        gear_parts.append(center_hole)
+        
+        # Gear teeth (8 small rectangles around the circle)
+        for i in range(8):
+            angle = i * math.pi / 4  # 8 teeth at 45-degree intervals
+            tooth_x = icon_x + 12 * math.cos(angle)
+            tooth_y = icon_y + 12 * math.sin(angle)
+            
+            # Create small rectangle for each tooth
+            tooth = self.canvas.create_rectangle(
+                tooth_x - 2, tooth_y - 1,
+                tooth_x + 2, tooth_y + 1,
+                outline='white', width=1, fill='white'
+            )
+            gear_parts.append(tooth)
+        
+        # Store all icon parts for click detection
+        self.settings_icon_items = [bg_circle] + gear_parts
+        
+        # Bind click events to all parts of the icon
+        for item in self.settings_icon_items:
+            self.canvas.tag_bind(item, '<Button-1>', self._on_settings_icon_click)
+            self.canvas.tag_bind(item, '<Enter>', self._on_settings_icon_hover)
+            self.canvas.tag_bind(item, '<Leave>', self._on_settings_icon_leave)
+    
+    def _on_settings_icon_click(self, event=None):
+        """Handle settings icon click."""
+        self._on_open_settings(event)
+    
+    def _on_settings_icon_hover(self, event=None):
+        """Handle mouse hover over settings icon."""
+        if self.settings_icon_items:
+            # Make the background circle more visible on hover
+            self.canvas.itemconfig(self.settings_icon_items[0], stipple='gray25')
+    
+    def _on_settings_icon_leave(self, event=None):
+        """Handle mouse leave settings icon."""
+        if self.settings_icon_items:
+            # Restore normal background opacity
+            self.canvas.itemconfig(self.settings_icon_items[0], stipple='gray50')
     
     def _start_services(self) -> None:
         """Start all background services and update timers."""
@@ -203,6 +284,9 @@ class KioskClockApp:
         
         # F5 to reload configuration
         self.root.bind('<F5>', self._on_reload_config)
+        
+        # F6 to open settings
+        self.root.bind('<F6>', self._on_open_settings)
     
     def _update_clock(self) -> None:
         """Update clock and date display."""
@@ -335,6 +419,11 @@ class KioskClockApp:
             if item:
                 self.canvas.itemconfig(item, state='hidden')
         
+        # Hide settings icon
+        if self.settings_icon_items:
+            for item in self.settings_icon_items:
+                self.canvas.itemconfig(item, state='hidden')
+        
         # Turn off screen
         self.alarm_manager.turn_screen_off()
         self.logger.info("Display hidden")
@@ -349,6 +438,11 @@ class KioskClockApp:
                     self.weather_text, self.weather_shadow, self.weather_icon_item,
                     self.discord_text, self.discord_shadow]:
             if item:
+                self.canvas.itemconfig(item, state='normal')
+        
+        # Show settings icon
+        if self.settings_icon_items:
+            for item in self.settings_icon_items:
                 self.canvas.itemconfig(item, state='normal')
         
         # Turn on screen
@@ -432,6 +526,35 @@ class KioskClockApp:
             self.logger.info("Configuration reloaded")
         except Exception as e:
             self.logger.error(f"Error reloading configuration: {e}")
+    
+    def _on_open_settings(self, event=None) -> None:
+        """Handle settings open request."""
+        try:
+            # Temporarily disable topmost for main window to allow settings to appear on top
+            was_topmost = self.root.attributes('-topmost')
+            if was_topmost:
+                self.root.attributes('-topmost', False)
+            
+            # Show settings window
+            self.settings_manager.show_settings()
+            
+            # Wait for settings window to close, then restore topmost if needed
+            def restore_topmost():
+                if was_topmost and not self.settings_manager.settings_window:
+                    self.root.attributes('-topmost', True)
+                    self.root.lift()
+                # Check again in 500ms if settings window still exists
+                elif self.settings_manager.settings_window and self.settings_manager.settings_window.winfo_exists():
+                    self.root.after(500, restore_topmost)
+                elif was_topmost:
+                    self.root.attributes('-topmost', True)
+                    self.root.lift()
+            
+            # Start checking for settings window closure
+            self.root.after(500, restore_topmost)
+            
+        except Exception as e:
+            self.logger.error(f"Error opening settings: {e}")
     
     def cleanup(self) -> None:
         """Clean up resources."""

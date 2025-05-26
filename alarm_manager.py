@@ -70,8 +70,6 @@ class AlarmManager:
                         # Validate time format
                         if parse_time_string(line):
                             alarm_times.append(line)
-                        else:
-                            self.logger.warning(f"Invalid time format in alarm config: {line}")
         except Exception as e:
             self.logger.error(f"Failed to read alarm times: {e}")
         
