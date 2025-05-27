@@ -158,20 +158,37 @@ Place background images in the `backgrounds/` directory:
 
 ```
 kiosk-clock/
-├── kiosk_clock_app.py          # Main application
-├── config.py                   # Configuration and constants
-├── utils.py                    # Utility functions
-├── calendar_integration.py     # Google Calendar API
-├── audio_manager.py            # Audio and TTS handling
-├── alarm_manager.py            # Alarm scheduling
-├── weather_manager.py          # Weather data and icons
-├── background_manager.py       # Dynamic backgrounds
+├── kiosk_clock_app.py          # Main application with UI and event handling
+├── config.py                   # Configuration loader (reads alarm_config.txt)
+├── settings_manager.py         # Graphical settings interface (F6 key)
+├── utils.py                    # Utility functions and helpers
+├── calendar_integration.py     # Google Calendar API integration
+├── audio_manager.py            # Audio playback and TTS handling
+├── alarm_manager.py            # Alarm scheduling and notifications
+├── weather_manager.py          # Weather data and icon management
+├── background_manager.py       # Dynamic background image rotation
+├── discord_manager.py          # Discord integration and message display
 ├── requirements.txt            # Python dependencies
-├── alarm_config.txt           # Alarm configuration
-├── weather_icons/             # Weather icon assets
-├── backgrounds/               # Background images
-├── logs/                     # Application logs
-└── docs/                     # Documentation
+├── alarm_config.txt           # Unified configuration file (all settings)
+├── credentials.json           # Google Calendar API credentials
+├── token.pickle              # Google OAuth token cache
+├── alarm.wav                 # Alarm sound file
+├── weather_icons/            # Weather condition icons
+│   ├── clear.png
+│   ├── cloudy.png
+│   ├── rain.png
+│   └── ...
+├── backgrounds/              # Background image directory
+│   └── *.jpg, *.png         # Rotating background images
+├── logs/                    # Application logs with rotation
+│   └── kiosk_clock_*.log
+├── test_settings.py         # Standalone settings testing
+├── test_settings_rpi.py     # Raspberry Pi settings testing  
+├── test_settings_icon.py    # Settings icon testing
+├── test_config_reading.py   # Configuration system testing
+├── test_discord.py          # Discord integration testing
+└── docs/                   # Documentation files
+    └── screenshot.png
 ```
 
 ## 🖥️ Platform-Specific Setup
