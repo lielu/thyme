@@ -170,6 +170,7 @@ alarm_config.txt
 # Temporary files
 tts_output.mp3
 *.wav
+medium_blog_post.md
 
 # Log files
 logs/
