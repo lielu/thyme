@@ -1,0 +1,18 @@
+[Unit]
+Description=Thyme Digital Clock Display
+After=graphical-session.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/thyme
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/home/pi/.Xauthority"
+ExecStartPre=/bin/bash -c 'while ! pgrep -x "Xorg"; do sleep 1; done'
+ExecStart=/home/pi/thyme/start_thyme.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=graphical-session.target 

@@ -1,8 +1,8 @@
-# Contributing to Kiosk Clock
+# Contributing to Thyme
 
 First off, thanks for taking the time to contribute! 🎉
 
-The following is a set of guidelines for contributing to Kiosk Clock. These are mostly guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
+The following is a set of guidelines for contributing to Thyme. These are mostly guidelines, not rules. Use your best judgment, and feel free to propose changes to this document in a pull request.
 
 ## Code of Conduct
 
@@ -156,7 +156,7 @@ Use the existing logging infrastructure:
 ```python
 import logging
 
-logger = logging.getLogger('kiosk_clock.module_name')
+logger = logging.getLogger('thyme.module_name')
 
 # Log levels
 logger.debug("Detailed debug information")

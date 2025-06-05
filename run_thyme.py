@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Kiosk Clock Launcher
+Thyme Launcher
 
-Simple launcher script to run the kiosk clock application from the reorganized src directory.
+Simple launcher script to run the Thyme application from the reorganized src directory.
 """
 
 import sys
@@ -20,7 +20,7 @@ if __name__ == '__main__':
         from kiosk_clock_app import main
         main()
     except KeyboardInterrupt:
-        print("\nKiosk clock stopped by user")
+        print("\nThyme stopped by user")
     except Exception as e:
-        print(f"Error starting kiosk clock: {e}")
+        print(f"Error starting Thyme: {e}")
         sys.exit(1) 

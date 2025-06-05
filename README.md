@@ -1,13 +1,13 @@
-# Kiosk Clock 📱⏰
+# Thyme 🌿⏰
 
 [![Python Version](https://img.shields.io/badge/python-3.7%2B-blue.svg)](https://python.org)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/your-username/kiosk-clock/graphs/commit-activity)
+[![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/your-username/thyme/graphs/commit-activity)
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-donate-yellow.svg)](https://www.buymeacoffee.com/lielu)
 
 A beautiful, full-screen digital clock application with Google Calendar integration, alarms, weather display, and dynamic backgrounds. Perfect for Raspberry Pi kiosks, wall-mounted displays, or any always-on screen.
 
-![Kiosk Clock Screenshot](docs/screenshot.png)
+![Thyme Screenshot](docs/screenshot.png)
 
 ## ✨ Features
 
@@ -25,12 +25,12 @@ A beautiful, full-screen digital clock application with Google Calendar integrat
 
 ## 🚀 Quick Start
 
-1. **Start the kiosk clock:** Run the shell script:
+1. **Start Thyme:** Run the shell script:
 ```bash
-./start_kiosk_clock.sh
+./start_thyme.sh
 ```
 
-2. **Open settings:** Press `F6` or click the ⚙️ icon to configure your kiosk
+2. **Open settings:** Press `F6` or click the ⚙️ icon to configure your display
 
 The application will start in windowed mode by default. For full-screen kiosk mode, set `SCREEN_FULLSCREEN=True` in your environment or `alarm_config.txt`.
 
@@ -40,7 +40,7 @@ The application will start in windowed mode by default. For full-screen kiosk mo
 
 Access the graphical settings page in two ways:
 - **Click the gear icon** in the top-right corner of the display
-- Press **F6** while the kiosk clock is running
+- Press **F6** while Thyme is running
 
 This provides an easy way to configure:
 
@@ -57,8 +57,8 @@ The settings page includes helpful tooltips, validation, and the ability to auto
 All settings are stored in `src/alarm_config.txt` for easy manual editing and version control:
 
 ```bash
-# Kiosk Clock Configuration
-# This file contains all settings for the Kiosk Clock application
+# Thyme Configuration
+# This file contains all settings for the Thyme application
 
 # Google Calendar Settings
 CALENDAR_ID=your-email@gmail.com
@@ -146,8 +146,8 @@ The project is organized into the following structure:
 │       ├── test_config_reading.py
 │       ├── test_discord.py
 │       └── test_*.py            # Other test files
-├── run_kiosk.py                 # Application launcher
-├── start_kiosk_clock.sh         # Shell script launcher
+├── run_thyme.py                 # Application launcher
+├── start_thyme.sh               # Shell script launcher
 ├── requirements.txt             # Python dependencies
 ├── logs/                        # Application logs
 └── docs/                        # Documentation
@@ -171,9 +171,9 @@ The project is organized into the following structure:
 
 3. **Auto-start on boot** (create systemd service)
    ```bash
-   sudo cp kiosk_clock.service /etc/systemd/system/
-   sudo systemctl enable kiosk_clock.service
-   sudo systemctl start kiosk_clock.service
+   sudo cp thyme.service /etc/systemd/system/
+   sudo systemctl enable thyme.service
+   sudo systemctl start thyme.service
    ```
 
 4. **Configure audio output**
@@ -241,7 +241,7 @@ The application includes a script to download Bing daily wallpapers:
 
 ```bash
 # Non-fullscreen mode for development
-python3 run_kiosk.py
+python3 run_thyme.py
 # Press ESC to exit
 # Press F5 to reload configuration
 # Press F6 to open settings page
@@ -266,7 +266,7 @@ The application uses a modular architecture:
 
 ## 📊 Logging
 
-Logs are written to `logs/kiosk_clock_YYYYMMDD.log` with rotation:
+Logs are written to `logs/thyme_YYYYMMDD.log` with rotation:
 - **DEBUG**: Detailed operational information
 - **INFO**: General application flow
 - **WARNING**: Potential issues
@@ -307,7 +307,7 @@ Logs are written to `logs/kiosk_clock_YYYYMMDD.log` with rotation:
 Enable debug logging:
 ```bash
 export LOG_LEVEL=DEBUG
-python3 run_kiosk.py
+python3 run_thyme.py
 ```
 
 ## 🤝 Contributing
@@ -326,8 +326,8 @@ We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) f
 
 ```bash
 # Clone your fork
-git clone https://github.com/your-username/kiosk-clock.git
-cd kiosk-clock
+git clone https://github.com/your-username/thyme.git
+cd thyme
 
 # Install development dependencies
 pip install -r requirements-dev.txt
@@ -360,8 +360,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/your-username/kiosk-clock/issues)
-- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/your-username/kiosk-clock/discussions)
+- 🐛 **Bug Reports**: [GitHub Issues](https://github.com/your-username/thyme/issues)
+- 💡 **Feature Requests**: [GitHub Discussions](https://github.com/your-username/thyme/discussions)
 - 📧 **Email**: your-email@example.com
 
 ## 🗺️ Roadmap

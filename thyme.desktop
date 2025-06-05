@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Thyme
+Comment=Digital clock with calendar and weather
+Exec=/bin/bash "/home/lielu/projects/kiosk/start_thyme.sh"
+Icon=clock 

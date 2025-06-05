@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Major Refactoring 🎉
 
-This release represents a complete rewrite of the Kiosk Clock application with a focus on modularity, maintainability, and open source best practices.
+This release represents a complete rewrite of the Thyme application with a focus on modularity, maintainability, and open source best practices.
 
 ### Added
 - **Modular Architecture**: Split monolithic code into specialized managers

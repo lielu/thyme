@@ -1,6 +1,6 @@
-# Discord Setup Guide for Kiosk Clock
+# Discord Setup Guide for Thyme
 
-This guide will help you set up Discord integration for your Kiosk Clock. The kiosk will display recent messages from a Discord channel, making it perfect for family updates, group announcements, or team communications.
+This guide will help you set up Discord integration for your Thyme display. Thyme will display recent messages from a Discord channel, making it perfect for family updates, group announcements, or team communications.
 
 ## 🤖 Part 1: Create a Discord Bot
 
@@ -9,7 +9,7 @@ This guide will help you set up Discord integration for your Kiosk Clock. The ki
 
 2. **Create New Application:**
    - Click "New Application"
-   - Name it something like "Family Kiosk Bot" or "Kiosk Clock"
+   - Name it something like "Family Thyme Bot" or "Thyme Display"
    - Click "Create"
 
 3. **Configure Bot Settings:**
@@ -52,7 +52,7 @@ This guide will help you set up Discord integration for your Kiosk Clock. The ki
    - Select "Copy ID"
    - This is your Channel ID (a long number like `1234567890123456789`)
 
-## ⚙️ Part 4: Configure Kiosk Clock
+## ⚙️ Part 4: Configure Thyme
 
 Set environment variables for your system, or you can update them in `config.py`:
 
@@ -72,7 +72,7 @@ set KIOSK_DISCORD_CHANNEL_ID=your_channel_id_here
 
 ### Temporary Testing
 ```bash
-KIOSK_DISCORD_TOKEN="your_bot_token_here" KIOSK_DISCORD_CHANNEL_ID="your_channel_id_here" python kiosk_clock_app.py
+KIOSK_DISCORD_TOKEN="your_bot_token_here" KIOSK_DISCORD_CHANNEL_ID="your_channel_id_here" python run_thyme.py
 ```
 
 ## 🧪 Part 5: Test the Setup
@@ -97,18 +97,18 @@ KIOSK_DISCORD_TOKEN="your_bot_token_here" KIOSK_DISCORD_CHANNEL_ID="your_channel
    python -c "from discord_manager import DiscordManager; dm = DiscordManager(); print('Discord authenticated:', dm.is_authenticated())"
    ```
 
-4. **Start Kiosk Application:**
+4. **Start Thyme Application:**
    ```bash
-   python kiosk_clock_app.py
+   python run_thyme.py
    ```
 
 5. **Test Messaging:**
    - Send a test message in your Discord channel
-   - It should appear on the kiosk display within 10 seconds
+   - It should appear on the Thyme display within 10 seconds
 
 ## 💡 Usage Tips
 
-- 📱 The kiosk displays the **3 most recent messages** from the configured channel
+- 📱 The Thyme displays the **3 most recent messages** from the configured channel
 - ✂️ Messages are automatically **truncated** if they're too long (100 characters max)
 - 🤖 **Bot commands** (messages starting with `!`) are ignored
 - 📝 Only **text messages** are supported (no images/embeds)
@@ -125,7 +125,7 @@ KIOSK_DISCORD_TOKEN="your_bot_token_here" KIOSK_DISCORD_CHANNEL_ID="your_channel
 
 - 🔐 **Keep your bot token secure** and never share it
 - 👁️ Only give the bot **minimal permissions** (read-only)
-- 🔒 Consider creating a **private channel** for kiosk messages
+- 🔒 Consider creating a **private channel** for Thyme messages
 - 📋 The bot can only read messages from **channels it has access to**
 - 🚪 You can **remove the bot anytime** by kicking it from the server
 
@@ -157,7 +157,7 @@ The Discord manager includes built-in SSL certificate handling for macOS systems
 ### Authentication errors:
 - ✅ Double-check your environment variables are set correctly
 - ✅ Restart your terminal/shell after setting environment variables
-- ✅ Try running with explicit variables: `KIOSK_DISCORD_TOKEN="..." python kiosk_clock_app.py`
+- ✅ Try running with explicit variables: `KIOSK_DISCORD_TOKEN="..." python run_thyme.py`
 
 ### Permission denied:
 - ✅ Make sure the bot has the right permissions in the channel
@@ -179,8 +179,8 @@ If you encounter issues:
 
 1. 📚 Check the [Discord Developer Documentation](https://discord.com/developers/docs)
 2. 🔍 Verify your setup step by step
-3. 📋 Check the kiosk application logs for detailed error messages
-4. 🧪 Test the bot connection independently before running the full kiosk
+3. 📋 Check the Thyme application logs for detailed error messages
+4. 🧪 Test the bot connection independently before running the full Thyme
 
 ---
 

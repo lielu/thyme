@@ -1,8 +1,8 @@
-# Kiosk Clock Refactoring Summary
+# Thyme Refactoring Summary
 
 ## 🎯 Project Transformation Overview
 
-This document summarizes the comprehensive refactoring performed on the Kiosk Clock project to transform it from a monolithic script into a professional, open-source ready application.
+This document summarizes the comprehensive refactoring performed on the Thyme project to transform it from a monolithic script into a professional, open-source ready application.
 
 ## 📊 Before vs After
 
@@ -238,7 +238,7 @@ The refactored architecture enables several future enhancements:
 
 ## 🏁 Conclusion
 
-This refactoring transforms the Kiosk Clock from a personal script into a professional, community-ready open source project. The new architecture provides:
+This refactoring transforms Thyme from a personal script into a professional, community-ready open source project. The new architecture provides:
 
 - **Better Code Quality**: Following industry best practices
 - **Enhanced User Experience**: Easier setup and configuration
