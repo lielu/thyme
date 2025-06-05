@@ -6,6 +6,10 @@ Simple test script to verify the embedded settings overlay functionality
 works correctly without the full kiosk clock application.
 """
 
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import tkinter as tk
 import math
 from settings_manager import SettingsManager

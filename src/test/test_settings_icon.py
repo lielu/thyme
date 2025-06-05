@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
 """
-Test Settings Icon
+Test Settings Icon Integration
 
-Simple test script to verify the settings icon functionality
-in a windowed mode instead of fullscreen.
+Simple test script to verify the clickable settings gear icon
+works correctly with the main kiosk clock display.
 """
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import tkinter as tk
 import math

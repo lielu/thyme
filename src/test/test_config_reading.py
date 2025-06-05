@@ -6,8 +6,15 @@ Test script to verify that configuration is being read correctly
 from alarm_config.txt instead of environment variables.
 """
 
-from config import user_config
+import sys
 import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+try:
+    from config import user_config
+except ImportError:
+    print("❌ config module not found")
+    sys.exit(1)
 
 def test_config_loading():
     """Test that configuration is loaded correctly."""

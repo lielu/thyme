@@ -25,51 +25,14 @@ A beautiful, full-screen digital clock application with Google Calendar integrat
 
 ## 🚀 Quick Start
 
-### Prerequisites
+1. **Start the kiosk clock:** Run the shell script:
+```bash
+./start_kiosk_clock.sh
+```
 
-- Python 3.7 or higher
-- Google Cloud Console project with Calendar API enabled
-- Audio system (speakers/headphones)
+2. **Open settings:** Press `F6` or click the ⚙️ icon to configure your kiosk
 
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/lielu/kiosk_clock.git
-   cd kiosk_clock
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up Google Calendar API**
-   - Go to [Google Cloud Console](https://console.cloud.google.com/)
-   - Create a new project or select existing
-   - Enable the Google Calendar API
-   - Create OAuth 2.0 credentials
-   - Download credentials as `credentials.json` in the project directory
-
-4. **Set up Discord Integration** (optional, refer to [discord_setup_guide](discord_setup_guide.md))
-   - Create a Discord bot at [Discord Developer Portal](https://discord.com/developers/applications)
-   - Enable Message Content Intent for the bot
-   - Add the bot to your Discord server with read permissions
-   - Get the channel ID from Discord (enable Developer Mode)
-   - Set environment variables with bot token and channel ID
-
-5. **Configure alarms** (optional)
-   ```bash
-   cp alarm_config.txt.example alarm_config.txt
-   # Edit alarm_config.txt with your preferred alarm times
-   ```
-
-6. **Run the application**
-   ```bash
-   ./start_kiosk_clock.sh
-   # OR
-   python kiosk_clock_app.py
-   ```
+The application will start in windowed mode by default. For full-screen kiosk mode, set `SCREEN_FULLSCREEN=True` in your environment or `alarm_config.txt`.
 
 ## 🛠️ Configuration
 
@@ -91,7 +54,7 @@ The settings page includes helpful tooltips, validation, and the ability to auto
 
 ### Configuration File (alarm_config.txt)
 
-All settings are stored in `alarm_config.txt` for easy manual editing and version control:
+All settings are stored in `src/alarm_config.txt` for easy manual editing and version control:
 
 ```bash
 # Kiosk Clock Configuration
@@ -123,7 +86,7 @@ DISPLAY_ON=07:00
 
 ### Environment Variables (Alternative)
 
-You can also configure the application using environment variables, which will override settings in `alarm_config.txt`:
+You can also configure the application using environment variables, which will override settings in `src/alarm_config.txt`:
 
 ```bash
 # Calendar settings
@@ -149,46 +112,45 @@ For backwards compatibility, the application also reads from:
 
 ### Background Images
 
-Place background images in the `backgrounds/` directory:
+Place background images in the `src/backgrounds/` directory:
 - Supported formats: JPG, PNG, GIF, BMP
 - Images are automatically resized to screen resolution
 - Rotates every 30 seconds with fade effects
 
-## 📁 Project Structure
+## Project Structure
+
+The project is organized into the following structure:
 
 ```
-kiosk-clock/
-├── kiosk_clock_app.py          # Main application with UI and event handling
-├── config.py                   # Configuration loader (reads alarm_config.txt)
-├── settings_manager.py         # Graphical settings interface (F6 key)
-├── utils.py                    # Utility functions and helpers
-├── calendar_integration.py     # Google Calendar API integration
-├── audio_manager.py            # Audio playback and TTS handling
-├── alarm_manager.py            # Alarm scheduling and notifications
-├── weather_manager.py          # Weather data and icon management
-├── background_manager.py       # Dynamic background image rotation
-├── discord_manager.py          # Discord integration and message display
-├── requirements.txt            # Python dependencies
-├── alarm_config.txt           # Unified configuration file (all settings)
-├── credentials.json           # Google Calendar API credentials
-├── token.pickle              # Google OAuth token cache
-├── alarm.wav                 # Alarm sound file
-├── weather_icons/            # Weather condition icons
-│   ├── clear.png
-│   ├── cloudy.png
-│   ├── rain.png
-│   └── ...
-├── backgrounds/              # Background image directory
-│   └── *.jpg, *.png         # Rotating background images
-├── logs/                    # Application logs with rotation
-│   └── kiosk_clock_*.log
-├── test_settings.py         # Standalone settings testing
-├── test_settings_rpi.py     # Raspberry Pi settings testing  
-├── test_settings_icon.py    # Settings icon testing
-├── test_config_reading.py   # Configuration system testing
-├── test_discord.py          # Discord integration testing
-└── docs/                   # Documentation files
-    └── screenshot.png
+├── src/                         # Source code
+│   ├── alarm_config.txt         # Configuration file
+│   ├── credentials.json         # Google Calendar API credentials
+│   ├── discord_token.txt        # Discord bot token (optional)
+│   ├── kiosk_clock_app.py       # Main application entry point
+│   ├── config.py                # Configuration management
+│   ├── settings_manager.py      # Settings interface and management
+│   ├── alarm_manager.py         # Alarm functionality
+│   ├── audio_manager.py         # Audio playback and TTS
+│   ├── calendar_integration.py  # Google Calendar integration
+│   ├── weather_manager.py       # Weather data and icons
+│   ├── background_manager.py    # Dynamic backgrounds
+│   ├── discord_manager.py       # Discord integration
+│   ├── utils.py                 # Utility functions
+│   ├── backgrounds/             # Background images
+│   ├── sounds/                  # Audio files
+│   │   └── alarm.wav            # Default alarm sound
+│   ├── weather_icons/           # Weather icon files
+│   └── test/                    # Test files
+│       ├── test_embedded_settings.py
+│       ├── test_settings_icon.py
+│       ├── test_config_reading.py
+│       ├── test_discord.py
+│       └── test_*.py            # Other test files
+├── run_kiosk.py                 # Application launcher
+├── start_kiosk_clock.sh         # Shell script launcher
+├── requirements.txt             # Python dependencies
+├── logs/                        # Application logs
+└── docs/                        # Documentation
 ```
 
 ## 🖥️ Platform-Specific Setup
@@ -249,7 +211,7 @@ No additional setup required - uses built-in Windows audio systems.
 
 ### Weather Icons
 
-Weather icons are located in `weather_icons/` and use Open-Meteo weather codes:
+Weather icons are located in `src/weather_icons/` and use Open-Meteo weather codes:
 - `clear.png` - Clear skies
 - `partly_cloudy.png` - Partly cloudy
 - `cloudy.png` - Overcast
@@ -279,7 +241,7 @@ The application includes a script to download Bing daily wallpapers:
 
 ```bash
 # Non-fullscreen mode for development
-python kiosk_clock_app.py
+python3 run_kiosk.py
 # Press ESC to exit
 # Press F5 to reload configuration
 # Press F6 to open settings page
@@ -315,14 +277,14 @@ Logs are written to `logs/kiosk_clock_YYYYMMDD.log` with rotation:
 ### Common Issues
 
 **Google Calendar not working**
-- Verify `credentials.json` is present and valid
+- Verify `src/credentials.json` is present and valid
 - Check calendar permissions in Google Cloud Console
 - Ensure internet connectivity
 
 **Audio not playing**
 - Linux: Install `aplay` and `mpg123`
 - Check audio device configuration
-- Verify `alarm.wav` file exists
+- Verify `src/sounds/alarm.wav` file exists
 
 **Weather not updating**
 - Check internet connectivity
@@ -330,7 +292,7 @@ Logs are written to `logs/kiosk_clock_YYYYMMDD.log` with rotation:
 - Review weather API rate limits
 
 **Background images not showing**
-- Place images in `backgrounds/` directory
+- Place images in `src/backgrounds/` directory
 - Check image file formats (JPG, PNG, GIF, BMP)
 - Verify file permissions
 
@@ -345,7 +307,7 @@ Logs are written to `logs/kiosk_clock_YYYYMMDD.log` with rotation:
 Enable debug logging:
 ```bash
 export LOG_LEVEL=DEBUG
-python kiosk_clock_app.py
+python3 run_kiosk.py
 ```
 
 ## 🤝 Contributing

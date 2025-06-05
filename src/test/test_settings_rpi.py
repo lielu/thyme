@@ -2,9 +2,12 @@
 """
 Test Settings on Raspberry Pi
 
-Simple test script to verify the settings window works correctly
-on Raspberry Pi and other Linux systems where grab_set() might fail.
+Test script specifically for Raspberry Pi compatibility testing.
 """
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import tkinter as tk
 from settings_manager import SettingsManager

@@ -20,4 +20,4 @@ source "kiosk_clock/bin/activate"
 python -m pip install -r requirements.txt
 
 # Run the Python app
-python "$DIR/kiosk_clock_app.py" 
+python "$DIR/run_kiosk.py" 

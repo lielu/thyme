@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """
-Test script for Discord integration.
+Test Discord Manager
 
-This script tests the Discord bot connection without running the full kiosk.
-Useful for troubleshooting Discord setup issues.
+Simple test script to verify Discord integration works correctly.
 """
 
-import os
 import sys
-import time
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 import asyncio
+import time
 from discord_manager import DiscordManager
 from config import user_config
 

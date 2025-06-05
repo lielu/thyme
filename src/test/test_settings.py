@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """
-Test script for the Settings Manager module.
+Test Settings Manager
 
-This script creates a simple window to test the settings manager
-functionality without running the full kiosk clock application.
+Simple test script to verify settings functionality.
 """
+
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import tkinter as tk
 from settings_manager import SettingsManager

@@ -18,7 +18,7 @@ APP_DESCRIPTION = "A full-screen digital clock with calendar integration, alarms
 
 # File Paths
 ALARM_CONFIG_FILE = 'alarm_config.txt'
-ALARM_WAV_FILE = 'alarm.wav'
+ALARM_WAV_FILE = 'sounds/alarm.wav'
 CREDENTIALS_FILE = 'credentials.json'
 TOKEN_FILE = 'token.pickle'
 TTS_OUTPUT_FILE = 'tts_output.mp3'
