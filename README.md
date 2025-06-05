@@ -257,6 +257,38 @@ The application uses a modular architecture:
 - **Error Handling**: Comprehensive logging and graceful error recovery
 - **Type Hints**: Full type annotations for better code quality
 
+### Viewing Architecture Diagrams
+
+The project includes comprehensive Mermaid diagrams in `architecture_diagram.md` that visualize the system architecture, component interactions, and data flow.
+
+#### Setting up Mermaid Preview in Cursor/VS Code
+
+To view the Mermaid diagrams directly in your editor:
+
+1. **Install Required Extensions**:
+   - Open Extensions panel: `Ctrl+Shift+X` (Windows/Linux) or `Cmd+Shift+X` (macOS)
+   - Search and install:
+     - **"Markdown Preview Mermaid Support"** by `bierner` (enables Mermaid rendering in markdown preview)
+     - **"Mermaid Markdown Syntax Highlighting"** by `bpruitt-goddard` (syntax highlighting for mermaid blocks)
+
+2. **View Diagrams**:
+   - Open `architecture_diagram.md`
+   - Press `Ctrl+Shift+V` (Windows/Linux) or `Cmd+Shift+V` (macOS) to open preview
+   - Use `Ctrl+K V` for side-by-side view (editor + preview)
+
+3. **Alternative: Individual Diagram Files**:
+   - `.mermaid` files work with the "Mermaid Editor" extension
+   - Provides live preview and export options for individual diagrams
+
+#### Architecture Documentation
+
+The diagrams include:
+- **System Architecture**: Overall component structure and relationships
+- **Component Interaction Flow**: Sequence diagrams showing runtime behavior
+- **Data Flow Architecture**: How data moves through the system
+- **Technology Stack**: Layered view of technologies used
+- **Deployment Architecture**: Different deployment scenarios and configurations
+
 ### Adding Features
 
 1. Create a new manager class in its own module
