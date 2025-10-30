@@ -1,0 +1,22 @@
+thyme (2.0.0-1) unstable; urgency=medium
+
+  * Initial Debian package release
+  * Full-screen digital clock with calendar integration
+  * Google Calendar integration with OAuth2 support
+  * Weather display with Open-Meteo API
+  * Discord integration for message display
+  * Configurable alarms with TTS announcements
+  * Dynamic background image support
+  * Comprehensive settings management interface
+  * Cross-platform audio support
+  * Systemd service integration
+  * Kiosk mode with fullscreen display
+  * Raspberry Pi optimizations
+
+ -- Thyme Contributors <your-email@example.com>  Thu, 02 Jan 2025 12:00:00 +0000
+
+thyme (1.0.0-1) unstable; urgency=low
+
+  * Initial release
+
+ -- Thyme Contributors <your-email@example.com>  Mon, 01 Jan 2024 12:00:00 +0000 

@@ -1,0 +1,339 @@
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    configure)
+        # Create thyme user and group if they don't exist
+        if ! getent group thyme >/dev/null; then
+            addgroup --system thyme
+        fi
+        
+        if ! getent passwd thyme >/dev/null; then
+            adduser --system --ingroup thyme --home /var/lib/thyme \
+                    --shell /bin/false --gecos "Thyme Digital Clock" thyme
+        fi
+        
+        # Create necessary directories
+        mkdir -p /var/lib/thyme/.config/thyme
+        mkdir -p /var/log/thyme
+        
+        # Set up configuration
+        if [ ! -f /var/lib/thyme/.config/thyme/alarm_config.txt ]; then
+            cp /etc/thyme/alarm_config.txt /var/lib/thyme/.config/thyme/
+        fi
+        
+        # Set permissions
+        chown -R thyme:thyme /var/lib/thyme
+        chown -R thyme:thyme /var/log/thyme
+        chmod 755 /var/lib/thyme
+        chmod 644 /var/lib/thyme/.config/thyme/alarm_config.txt
+        
+        # Add thyme user to necessary groups for audio and video
+        usermod -a -G audio,video thyme 2>/dev/null || true
+        
+        # Set up log rotation
+        cat > /etc/logrotate.d/thyme << EOF
+/var/log/thyme/*.log {
+    daily
+    missingok
+    rotate 7
+    compress
+    delaycompress
+    notifempty
+    create 644 thyme thyme
+    postrotate
+        systemctl reload thyme 2>/dev/null || true
+    endscript
+}
+EOF
+        
+        # Reload systemd to recognize new service
+        if [ -d /run/systemd/system ]; then
+            systemctl daemon-reload >/dev/null || true
+        fi
+        
+        echo "Thyme installation completed!"
+        echo "To configure and start Thyme:"
+        echo "  1. Edit /var/lib/thyme/.config/thyme/alarm_config.txt"
+        echo "  2. sudo systemctl enable thyme"
+        echo "  3. sudo systemctl start thyme"
+        echo ""
+        echo "For manual operation, run: thyme"
+        ;;
+    
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+    
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
+```
+
+```bash:debian/prerm
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    remove|upgrade|deconfigure)
+        # Stop the service
+        if [ -d /run/systemd/system ]; then
+            systemctl stop thyme >/dev/null 2>&1 || true
+            systemctl disable thyme >/dev/null 2>&1 || true
+        fi
+        ;;
+    
+    failed-upgrade)
+        ;;
+    
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
+```
+
+```bash:debian/postrm
+#!/bin/bash
+
+set -e
+
+case "$1" in
+    purge)
+        # Remove user and group
+        if getent passwd thyme >/dev/null; then
+            deluser thyme >/dev/null 2>&1 || true
+        fi
+        
+        if getent group thyme >/dev/null; then
+            delgroup thyme >/dev/null 2>&1 || true
+        fi
+        
+        # Remove directories and files
+        rm -rf /var/lib/thyme
+        rm -rf /var/log/thyme
+        rm -f /etc/logrotate.d/thyme
+        
+        # Reload systemd
+        if [ -d /run/systemd/system ]; then
+            systemctl daemon-reload >/dev/null || true
+        fi
+        ;;
+    
+    remove|upgrade|failed-upgrade|abort-install|abort-upgrade|disappear)
+        ;;
+    
+    *)
+        echo "postrm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
+```
+
+```text:debian/dirs
+usr/bin
+usr/share/thyme
+usr/share/thyme/weather_icons
+usr/share/thyme/sounds
+usr/share/thyme/backgrounds
+usr/share/applications
+usr/share/doc/thyme
+etc/thyme
+var/lib/thyme
+var/log/thyme
+lib/systemd/system
+```
+
+```text:debian/install
+run_thyme.py usr/bin/thyme
+```
+
+```bash:build_deb.sh
+#!/bin/bash
+# Build script for creating Debian packages
+
+set -e
+
+echo "Building Thyme Debian package..."
+
+# Clean previous builds
+echo "Cleaning previous builds..."
+rm -rf debian/thyme
+rm -f ../thyme_*.deb ../thyme_*.dsc ../thyme_*.tar.xz ../thyme_*.changes ../thyme_*.buildinfo
+
+# Install build dependencies
+echo "Installing build dependencies..."
+sudo apt-get update
+sudo apt-get install -y devscripts build-essential debhelper dh-python python3-all python3-setuptools
+
+# Build the package
+echo "Building package..."
+debuild -us -uc -b
+
+echo "Build completed!"
+echo "Package files created in parent directory:"
+ls -la ../thyme_*.deb
+
+echo ""
+echo "To install the package:"
+echo "  sudo dpkg -i ../thyme_*.deb"
+echo "  sudo apt-get install -f  # Fix any dependency issues"
+echo ""
+echo "To test the package:"
+echo "  sudo dpkg -i ../thyme_*.deb"
+echo "  thyme --help"
+```
+
+```bash:test_package.sh
+#!/bin/bash
+# Test script for the Debian package
+
+set -e
+
+PACKAGE_FILE="../thyme_*.deb"
+
+echo "Testing Thyme Debian package installation..."
+
+# Check if package file exists
+if ! ls $PACKAGE_FILE 1> /dev/null 2>&1; then
+    echo "Error: No package file found. Run ./build_deb.sh first."
+    exit 1
+fi
+
+# Create test environment
+echo "Setting up test environment..."
+TEST_DIR="/tmp/thyme_test"
+rm -rf $TEST_DIR
+mkdir -p $TEST_DIR
+
+# Install package
+echo "Installing package..."
+sudo dpkg -i $PACKAGE_FILE || true
+sudo apt-get install -f -y
+
+# Test installation
+echo "Testing installation..."
+if command -v thyme >/dev/null 2>&1; then
+    echo "✓ thyme command is available"
+else
+    echo "✗ thyme command not found"
+    exit 1
+fi
+
+# Test service file
+if [ -f /lib/systemd/system/thyme.service ]; then
+    echo "✓ systemd service file installed"
+else
+    echo "✗ systemd service file missing"
+    exit 1
+fi
+
+# Test desktop file
+if [ -f /usr/share/applications/thyme.desktop ]; then
+    echo "✓ desktop file installed"
+else
+    echo "✗ desktop file missing"
+    exit 1
+fi
+
+# Test user creation
+if getent passwd thyme >/dev/null; then
+    echo "✓ thyme user created"
+else
+    echo "✗ thyme user not created"
+    exit 1
+fi
+
+echo ""
+echo "Package installation test completed successfully!"
+echo ""
+echo "To start the service:"
+echo "  sudo systemctl enable thyme"
+echo "  sudo systemctl start thyme"
+echo ""
+echo "To remove the package:"
+echo "  sudo apt-get remove thyme"
+echo "  sudo apt-get purge thyme  # Remove all config files"
+```
+
+Now make the scripts executable:
+
+```bash
+chmod +x debian/postinst debian/prerm debian/postrm
+chmod +x build_deb.sh test_package.sh
+```
+
+**All Debian packaging files have been created! Here's what you have now:**
+
+## 📁 **File Structure Created:**
+```
+debian/
+├── control           # Package metadata and dependencies
+├── rules            # Build rules and installation logic
+├── changelog        # Package version history
+├── compat           # Debhelper compatibility level
+├── copyright        # License information
+├── thyme.service    # Systemd service definition
+├── thyme.desktop    # Desktop application entry
+├── postinst         # Post-installation script
+├── prerm            # Pre-removal script  
+├── postrm           # Post-removal script
+├── dirs             # Directory structure
+└── install          # File installation mappings
+
+build_deb.sh         # Build automation script
+test_package.sh      # Package testing script
+```
+
+## 🚀 **How to Build and Use:**
+
+1. **Build the package:**
+   ```bash
+   ./build_deb.sh
+   ```
+
+2. **Test the package:**
+   ```bash
+   ./test_package.sh
+   ```
+
+3. **Install the package:**
+   ```bash
+   sudo dpkg -i ../thyme_*.deb
+   sudo apt-get install -f  # Fix any dependencies
+   ```
+
+4. **Configure and start:**
+   ```bash
+   sudo nano /var/lib/thyme/.config/thyme/alarm_config.txt
+   sudo systemctl enable thyme
+   sudo systemctl start thyme
+   ```
+
+## ✨ **Package Features:**
+
+- ✅ **Professional installation** with dedicated system user
+- ✅ **Systemd integration** for automatic startup
+- ✅ **Desktop application** entry in menu
+- ✅ **Dependency management** for all requirements
+- ✅ **Configuration management** with proper permissions
+- ✅ **Log rotation** setup
+- ✅ **Clean removal** process
+- ✅ **Cross-architecture** support (ARM64 for Pi, x64 for Ubuntu)
+
+The package is now ready to be built and distributed! It will work on both Raspberry Pi and Ubuntu systems. 

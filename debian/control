@@ -1,0 +1,49 @@
+Source: thyme
+Section: utils
+Priority: optional
+Maintainer: Thyme Contributors <your-email@example.com>
+Build-Depends: debhelper-compat (= 13),
+               dh-python,
+               python3-all,
+               python3-setuptools
+Standards-Version: 4.6.2
+Homepage: https://github.com/your-username/thyme
+Vcs-Browser: https://github.com/your-username/thyme
+Vcs-Git: https://github.com/your-username/thyme.git
+Rules-Requires-Root: no
+
+Package: thyme
+Architecture: all
+Depends: ${misc:Depends},
+         ${python3:Depends},
+         python3-tk,
+         python3-pil,
+         python3-pil.imagetk,
+         python3-requests,
+         python3-google-api-python-client,
+         python3-google-auth-oauthlib,
+         python3-google-auth,
+         python3-gtts,
+         alsa-utils,
+         mpg123,
+         espeak-ng,
+         fonts-noto-color-emoji,
+         xorg
+Recommends: pulseaudio
+Suggests: systemd
+Description: Beautiful full-screen digital clock with calendar integration
+ Thyme is a beautiful, full-screen digital clock application with Google 
+ Calendar integration, alarms, weather display, and dynamic backgrounds.
+ Perfect for Raspberry Pi kiosks, wall-mounted displays, or any always-on 
+ screen.
+ .
+ Features include:
+  * Full-screen digital clock with large, readable time and date display
+  * Google Calendar integration showing upcoming events
+  * Configurable alarms with visual and audio notifications
+  * Weather display with beautiful icons
+  * Discord integration for recent messages
+  * Dynamic backgrounds with smooth fade transitions
+  * Text-to-speech announcements
+  * Cross-platform support (Windows, macOS, Linux)
+  * Highly configurable via environment variables and config files 

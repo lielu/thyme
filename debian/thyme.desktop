@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Thyme Digital Clock
+GenericName=Digital Clock
+Comment=Beautiful full-screen digital clock with calendar integration
+Exec=/usr/bin/thyme
+Icon=preferences-system-time
+Categories=Utility;Clock;Calendar;
+Keywords=clock;time;calendar;weather;kiosk;
+StartupNotify=false
+Terminal=false 

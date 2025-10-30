@@ -1,0 +1,11 @@
+usr/bin
+usr/share/thyme
+usr/share/thyme/weather_icons
+usr/share/thyme/sounds
+usr/share/thyme/backgrounds
+usr/share/applications
+usr/share/doc/thyme
+etc/thyme
+var/lib/thyme
+var/log/thyme
+lib/systemd/system

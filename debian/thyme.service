@@ -1,0 +1,23 @@
+[Unit]
+Description=Thyme Digital Clock Display
+Documentation=man:thyme(1)
+After=graphical-session.target network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=thyme
+Group=thyme
+WorkingDirectory=/usr/share/thyme
+Environment="DISPLAY=:0"
+Environment="HOME=/var/lib/thyme"
+Environment="XDG_RUNTIME_DIR=/run/user/1001"
+ExecStartPre=/bin/bash -c 'while ! pgrep -x "Xorg\\|Wayland"; do sleep 1; done'
+ExecStart=/usr/bin/python3 /usr/bin/thyme
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=graphical-session.target 
