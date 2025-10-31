@@ -1,11 +1,12 @@
 /**
  * Calendar Manager
- * Handles Google Calendar API integration
+ * Handles Google Calendar API integration with OAuth
  */
 
 const fs = require('fs').promises;
 const path = require('path');
 const { google } = require('googleapis');
+const { BrowserWindow } = require('electron');
 
 class CalendarManager {
   constructor(config) {
@@ -16,6 +17,7 @@ class CalendarManager {
     this.tokenPath = path.join(__dirname, '..', '..', 'config', 'token.json');
     this.initialized = false;
     this.lastEvents = [];
+    this.authWindow = null;
     this.init();
   }
   
@@ -47,11 +49,12 @@ class CalendarManager {
       const credentials = JSON.parse(await fs.readFile(this.credentialsPath, 'utf8'));
       const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
       
-      // Create OAuth2 client
+      // Create OAuth2 client with localhost redirect
+      const redirectUri = redirect_uris[0] || 'http://localhost:3000/oauth2callback';
       const oAuth2Client = new google.auth.OAuth2(
         client_id,
         client_secret,
-        redirect_uris[0]
+        redirectUri
       );
       
       // Check if we have a saved token
@@ -69,8 +72,8 @@ class CalendarManager {
         }
         
       } catch (error) {
-        console.warn('No saved token found. Calendar integration requires manual OAuth setup.');
-        console.warn('Please run the Python version once to complete OAuth authentication.');
+        console.warn('No saved token found. Use Settings UI to authenticate with Google Calendar.');
+        this.auth = oAuth2Client; // Store for later authentication
         return;
       }
       
@@ -81,6 +84,150 @@ class CalendarManager {
     } catch (error) {
       console.error('Error authenticating with Google Calendar:', error.message);
       throw error;
+    }
+  }
+  
+  /**
+   * Start OAuth flow in a new window
+   * @returns {Promise<boolean>} True if authentication successful
+   */
+  async startOAuthFlow() {
+    try {
+      // Check if credentials exist
+      try {
+        await fs.access(this.credentialsPath);
+      } catch {
+        throw new Error('credentials.json not found. Please add your Google Calendar credentials.');
+      }
+      
+      // Load credentials
+      const credentials = JSON.parse(await fs.readFile(this.credentialsPath, 'utf8'));
+      const { client_secret, client_id, redirect_uris } = credentials.installed || credentials.web;
+      
+      const redirectUri = redirect_uris[0] || 'http://localhost:3000/oauth2callback';
+      const oAuth2Client = new google.auth.OAuth2(
+        client_id,
+        client_secret,
+        redirectUri
+      );
+      
+      // Generate auth URL
+      const authUrl = oAuth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: ['https://www.googleapis.com/auth/calendar.readonly'],
+        prompt: 'consent'
+      });
+      
+      console.log('Starting OAuth flow...');
+      
+      // Create authentication window
+      return new Promise((resolve, reject) => {
+        this.authWindow = new BrowserWindow({
+          width: 600,
+          height: 700,
+          webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true
+          }
+        });
+        
+        this.authWindow.loadURL(authUrl);
+        
+        // Listen for navigation to capture the authorization code
+        this.authWindow.webContents.on('will-redirect', async (event, url) => {
+          await this.handleOAuthCallback(url, oAuth2Client, resolve, reject);
+        });
+        
+        this.authWindow.webContents.on('did-navigate', async (event, url) => {
+          await this.handleOAuthCallback(url, oAuth2Client, resolve, reject);
+        });
+        
+        // Handle window close
+        this.authWindow.on('closed', () => {
+          this.authWindow = null;
+          reject(new Error('Authentication window closed'));
+        });
+      });
+      
+    } catch (error) {
+      console.error('Error starting OAuth flow:', error);
+      throw error;
+    }
+  }
+  
+  /**
+   * Handle OAuth callback
+   */
+  async handleOAuthCallback(url, oAuth2Client, resolve, reject) {
+    try {
+      const urlObj = new URL(url);
+      const code = urlObj.searchParams.get('code');
+      
+      if (code) {
+        console.log('Authorization code received');
+        
+        // Exchange code for tokens
+        const { tokens } = await oAuth2Client.getToken(code);
+        oAuth2Client.setCredentials(tokens);
+        
+        // Save tokens
+        await fs.writeFile(this.tokenPath, JSON.stringify(tokens, null, 2));
+        console.log('Tokens saved successfully');
+        
+        // Initialize calendar
+        this.auth = oAuth2Client;
+        this.calendar = google.calendar({ version: 'v3', auth: oAuth2Client });
+        this.initialized = true;
+        
+        // Close auth window
+        if (this.authWindow && !this.authWindow.isDestroyed()) {
+          this.authWindow.close();
+        }
+        
+        resolve(true);
+      }
+    } catch (error) {
+      console.error('Error handling OAuth callback:', error);
+      if (this.authWindow && !this.authWindow.isDestroyed()) {
+        this.authWindow.close();
+      }
+      reject(error);
+    }
+  }
+  
+  /**
+   * Check if calendar is authenticated
+   * @returns {boolean}
+   */
+  isAuthenticated() {
+    return this.calendar !== null && this.initialized;
+  }
+  
+  /**
+   * Get authentication status
+   * @returns {Object} Status information
+   */
+  async getAuthStatus() {
+    try {
+      const hasCredentials = await fs.access(this.credentialsPath)
+        .then(() => true)
+        .catch(() => false);
+      
+      const hasToken = await fs.access(this.tokenPath)
+        .then(() => true)
+        .catch(() => false);
+      
+      return {
+        hasCredentials,
+        hasToken,
+        isAuthenticated: this.isAuthenticated()
+      };
+    } catch (error) {
+      return {
+        hasCredentials: false,
+        hasToken: false,
+        isAuthenticated: false
+      };
     }
   }
   

@@ -143,6 +143,26 @@ class ThymeApp {
       }
     });
     
+    // Calendar authentication
+    ipcMain.handle('calendar-auth-status', async () => {
+      try {
+        return await this.managers.calendar.getAuthStatus();
+      } catch (error) {
+        console.error('Error getting calendar auth status:', error);
+        return { hasCredentials: false, hasToken: false, isAuthenticated: false };
+      }
+    });
+    
+    ipcMain.handle('calendar-start-oauth', async () => {
+      try {
+        await this.managers.calendar.startOAuthFlow();
+        return { success: true };
+      } catch (error) {
+        console.error('Error starting calendar OAuth:', error);
+        return { success: false, error: error.message };
+      }
+    });
+    
     // Weather data
     ipcMain.handle('get-weather', async () => {
       try {

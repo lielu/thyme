@@ -22,6 +22,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     return () => ipcRenderer.removeAllListeners('calendar-update');
   },
   
+  // Calendar authentication
+  getCalendarAuthStatus: () => ipcRenderer.invoke('calendar-auth-status'),
+  startCalendarOAuth: () => ipcRenderer.invoke('calendar-start-oauth'),
+  
   // Weather data
   getWeather: () => ipcRenderer.invoke('get-weather'),
   onWeatherUpdate: (callback) => {

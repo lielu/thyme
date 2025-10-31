@@ -23,6 +23,9 @@ class SettingsUI {
       const overlay = document.getElementById('settings-overlay');
       overlay.classList.remove('hidden');
       
+      // Check calendar authentication status
+      await this.updateCalendarAuthStatus();
+      
     } catch (error) {
       console.error('Error opening settings:', error);
       alert('Failed to open settings');
@@ -107,9 +110,25 @@ class SettingsUI {
           <div class="settings-help-text">Your Gmail address or calendar ID (use 'primary' for main calendar)</div>
         </div>
         
-        <div class="settings-help-text" style="margin-top: 16px;">
-          <strong>Note:</strong> Google Calendar requires OAuth authentication. 
-          Please ensure you've completed the authentication process using the Python version first.
+        <div class="settings-field" style="margin-top: 20px;">
+          <label>Authentication Status</label>
+          <div id="calendar-auth-status" style="padding: 12px; background: #3c3c3c; border-radius: 6px; margin-bottom: 12px;">
+            <span style="color: #9a9a9a;">Checking...</span>
+          </div>
+          <button class="btn btn-primary" id="calendar-auth-button" style="width: 100%;">
+            🔐 Authenticate with Google Calendar
+          </button>
+          <div class="settings-help-text" style="margin-top: 8px;">
+            Click to sign in with your Google account and grant calendar access
+          </div>
+        </div>
+        
+        <div class="settings-help-text" style="margin-top: 16px; padding: 12px; background: #2d2d30; border-radius: 6px;">
+          <strong>Setup Instructions:</strong><br>
+          1. Get your <code>credentials.json</code> from <a href="https://console.cloud.google.com" target="_blank" style="color: #0078d4;">Google Cloud Console</a><br>
+          2. Place it in the <code>config/</code> directory<br>
+          3. Click "Authenticate" button above<br>
+          4. Sign in and grant calendar access
         </div>
       </div>
     `;
@@ -274,6 +293,14 @@ class SettingsUI {
         this.addAlarm();
       }
     });
+    
+    // Calendar authentication button
+    const calendarAuthBtn = document.getElementById('calendar-auth-button');
+    if (calendarAuthBtn) {
+      calendarAuthBtn.addEventListener('click', () => {
+        this.authenticateCalendar();
+      });
+    }
   }
   
   async addAlarm() {
@@ -396,6 +423,102 @@ class SettingsUI {
     } catch (error) {
       console.error('Error resetting settings:', error);
       alert('Failed to reset settings');
+    }
+  }
+  
+  async updateCalendarAuthStatus() {
+    const statusDiv = document.getElementById('calendar-auth-status');
+    const authButton = document.getElementById('calendar-auth-button');
+    
+    if (!statusDiv || !authButton) return;
+    
+    try {
+      const status = await window.electronAPI.getCalendarAuthStatus();
+      
+      if (status.isAuthenticated) {
+        statusDiv.innerHTML = '<span style="color: #10b981;">✓ Authenticated and ready</span>';
+        authButton.textContent = '🔄 Re-authenticate';
+        authButton.classList.remove('btn-primary');
+        authButton.classList.add('btn-secondary');
+      } else if (status.hasToken) {
+        statusDiv.innerHTML = '<span style="color: #f59e0b;">⚠ Token found but not connected</span>';
+        authButton.textContent = '🔐 Authenticate with Google Calendar';
+      } else if (status.hasCredentials) {
+        statusDiv.innerHTML = '<span style="color: #9a9a9a;">⏳ Not authenticated yet</span>';
+        authButton.textContent = '🔐 Authenticate with Google Calendar';
+      } else {
+        statusDiv.innerHTML = '<span style="color: #ef4444;">✕ Missing credentials.json</span>';
+        authButton.textContent = '❓ Setup Instructions';
+        authButton.disabled = true;
+      }
+    } catch (error) {
+      console.error('Error checking calendar auth status:', error);
+      statusDiv.innerHTML = '<span style="color: #9a9a9a;">Unable to check status</span>';
+    }
+  }
+  
+  async authenticateCalendar() {
+    const authButton = document.getElementById('calendar-auth-button');
+    const statusDiv = document.getElementById('calendar-auth-status');
+    
+    if (!authButton || !statusDiv) return;
+    
+    // Check if credentials exist first
+    const status = await window.electronAPI.getCalendarAuthStatus();
+    if (!status.hasCredentials) {
+      alert(
+        'Missing credentials.json!\n\n' +
+        'Please follow these steps:\n' +
+        '1. Go to https://console.cloud.google.com\n' +
+        '2. Create a project and enable Google Calendar API\n' +
+        '3. Create OAuth 2.0 credentials (Desktop app)\n' +
+        '4. Download as credentials.json\n' +
+        '5. Place in config/ directory\n' +
+        '6. Restart the app and try again'
+      );
+      return;
+    }
+    
+    try {
+      // Disable button during authentication
+      authButton.disabled = true;
+      authButton.textContent = '⏳ Opening authentication...';
+      statusDiv.innerHTML = '<span style="color: #f59e0b;">🔄 Please sign in with Google...</span>';
+      
+      // Start OAuth flow
+      const result = await window.electronAPI.startCalendarOAuth();
+      
+      if (result.success) {
+        statusDiv.innerHTML = '<span style="color: #10b981;">✓ Authentication successful!</span>';
+        authButton.textContent = '✓ Authenticated';
+        authButton.classList.remove('btn-primary');
+        authButton.classList.add('btn-secondary');
+        
+        // Show success message
+        setTimeout(() => {
+          alert('Google Calendar authenticated successfully!\n\nYour calendar events will now appear on the display.');
+          // Update status
+          this.updateCalendarAuthStatus();
+        }, 500);
+      } else {
+        throw new Error(result.error || 'Authentication failed');
+      }
+      
+    } catch (error) {
+      console.error('Calendar authentication error:', error);
+      statusDiv.innerHTML = '<span style="color: #ef4444;">✕ Authentication failed</span>';
+      authButton.textContent = '🔐 Try Again';
+      
+      alert(
+        'Authentication failed!\n\n' +
+        'Error: ' + error.message + '\n\n' +
+        'Please check:\n' +
+        '1. credentials.json is in config/ directory\n' +
+        '2. You granted calendar permissions\n' +
+        '3. Your internet connection is working'
+      );
+    } finally {
+      authButton.disabled = false;
     }
   }
   

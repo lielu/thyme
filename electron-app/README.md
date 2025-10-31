@@ -9,7 +9,7 @@ A beautiful, full-screen kiosk clock application with Google Calendar integratio
 ## ✨ Features
 
 - 🕐 **Large Digital Clock** - Easy-to-read time display
-- 📅 **Google Calendar Integration** - View today's events
+- 📅 **Google Calendar Integration** - View today's events with **built-in OAuth authentication**
 - 🌤️ **Weather Display** - Current weather with Open-Meteo API
 - ⏰ **Customizable Alarms** - Set multiple daily alarms with TTS announcements
 - 💬 **Discord Integration** - Display recent messages from a Discord channel
@@ -44,7 +44,9 @@ npm install
 3. Create OAuth 2.0 credentials (Desktop app)
 4. Download the credentials as `credentials.json`
 5. Place `credentials.json` in the `config/` directory
-6. Run the Python version once to complete OAuth authentication, which will create `token.json`
+6. **NEW!** Use the built-in authentication button in Settings to authenticate directly (no Python required!)
+
+📖 **Detailed guide:** See [GOOGLE_CALENDAR_SETUP.md](GOOGLE_CALENDAR_SETUP.md) for complete setup instructions
 
 #### Weather Settings
 
@@ -90,6 +92,8 @@ Click the ⚙️ icon in the top-right to access settings:
 
 2. **Google Calendar**
    - Calendar ID configuration
+   - **One-click OAuth authentication** 🔐
+   - Real-time authentication status
 
 3. **Weather & Location**
    - Latitude/Longitude

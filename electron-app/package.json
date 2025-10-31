@@ -5,14 +5,28 @@
   "main": "main/index.js",
   "author": "Lie Lu",
   "license": "MIT",
+  "homepage": "https://github.com/lielu/thyme-kiosk-clock",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lielu/thyme-kiosk-clock.git"
+  },
   "scripts": {
     "start": "electron .",
     "dev": "electron . --dev",
     "build": "electron-builder",
     "build:linux": "electron-builder --linux",
+    "build:linux:appimage": "electron-builder --linux AppImage",
+    "build:linux:deb": "electron-builder --linux deb",
+    "build:linux:rpm": "electron-builder --linux rpm",
     "build:mac": "electron-builder --mac",
+    "build:mac:dmg": "electron-builder --mac dmg",
+    "build:mac:zip": "electron-builder --mac zip",
     "build:all": "electron-builder --linux --mac",
-    "postinstall": "electron-builder install-app-deps"
+    "build:dir": "electron-builder --dir",
+    "pack": "electron-builder --dir",
+    "dist": "npm run build:all",
+    "postinstall": "electron-builder install-app-deps",
+    "clean": "rm -rf dist build node_modules/.cache"
   },
   "build": {
     "appId": "com.lielu.thyme",
@@ -26,27 +40,64 @@
       "renderer/**/*",
       "preload.js",
       "assets/**/*",
-      "config/**/*",
-      "package.json"
+      "config/alarm_config.json",
+      "package.json",
+      "!config/credentials.json",
+      "!config/token.json"
+    ],
+    "extraResources": [
+      {
+        "from": "assets",
+        "to": "assets"
+      }
     ],
     "linux": {
       "target": [
         {
           "target": "AppImage",
-          "arch": ["x64", "arm64"]
+          "arch": ["x64", "arm64", "armv7l"]
         },
         {
           "target": "deb",
+          "arch": ["x64", "arm64", "armv7l"]
+        },
+        {
+          "target": "rpm",
           "arch": ["x64", "arm64"]
         }
       ],
       "category": "Utility",
-      "icon": "assets/icons/icon.png",
+      "synopsis": "Beautiful kiosk clock with calendar and weather",
+      "description": "A full-screen digital clock with Google Calendar integration, weather display, Discord messages, and customizable alarms.",
+      "maintainer": "Lie Lu",
+      "vendor": "Lie Lu",
       "desktop": {
         "Name": "Thyme Kiosk Clock",
+        "GenericName": "Kiosk Clock",
         "Comment": "Digital clock with calendar and weather",
-        "Categories": "Utility;Clock;"
-      }
+        "Categories": "Utility;Clock;Calendar;",
+        "Keywords": "clock;calendar;weather;alarm;kiosk;",
+        "Terminal": false,
+        "Type": "Application"
+      },
+      "executableName": "thyme-kiosk-clock"
+    },
+    "deb": {
+      "depends": [
+        "gconf2",
+        "gconf-service",
+        "libnotify4",
+        "libappindicator1",
+        "libxtst6",
+        "libnss3",
+        "alsa-utils"
+      ],
+      "priority": "optional"
+    },
+    "rpm": {
+      "depends": [
+        "alsa-utils"
+      ]
     },
     "mac": {
       "target": [
@@ -60,7 +111,28 @@
         }
       ],
       "category": "public.app-category.utilities",
-      "icon": "assets/icons/icon.icns"
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "title": "Thyme Kiosk Clock ${version}",
+      "window": {
+        "width": 540,
+        "height": 380
+      },
+      "contents": [
+        {
+          "x": 144,
+          "y": 150,
+          "type": "file"
+        },
+        {
+          "x": 396,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        }
+      ]
     }
   },
   "dependencies": {
