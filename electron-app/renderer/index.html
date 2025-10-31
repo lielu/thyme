@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' file: data:;">
+  <title>Thyme Kiosk Clock</title>
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <!-- Background -->
+  <div id="background" class="background"></div>
+  
+  <!-- Main App Container -->
+  <div id="app" class="app-container">
+    
+    <!-- Clock & Date (Top Right) -->
+    <div id="clock-container" class="clock-container">
+      <div id="clock" class="clock shadow-text">00:00:00</div>
+      <div id="date" class="date shadow-text">Loading...</div>
+    </div>
+    
+    <!-- Settings Icon (Top Right, below date) -->
+    <button id="settings-icon" class="settings-icon" title="Settings" aria-label="Open Settings">
+      ⚙️
+    </button>
+    
+    <!-- Alarms (Top Left) -->
+    <div id="alarms-container" class="alarms-container">
+      <div class="section-title shadow-text">⏰ Alarms</div>
+      <div id="alarms-list" class="shadow-text">Loading...</div>
+    </div>
+    
+    <!-- Discord Messages (Middle Left) -->
+    <div id="discord-container" class="discord-container">
+      <div class="section-title shadow-text">💬 Discord</div>
+      <div id="discord-messages" class="shadow-text">Loading...</div>
+    </div>
+    
+    <!-- Calendar Events (Bottom Left) -->
+    <div id="events-container" class="events-container">
+      <div class="section-title shadow-text">📅 Today's Events</div>
+      <div id="events-list" class="shadow-text">Loading...</div>
+    </div>
+    
+    <!-- Weather (Bottom Right) -->
+    <div id="weather-container" class="weather-container">
+      <div id="weather-text" class="weather-text shadow-text">--° / --°</div>
+      <img id="weather-icon" class="weather-icon" src="" alt="Weather icon" />
+    </div>
+    
+    <!-- Alarm Notification Overlay -->
+    <div id="alarm-overlay" class="alarm-overlay hidden">
+      <div id="alarm-message" class="alarm-message">⏰ ALARM ⏰</div>
+    </div>
+    
+    <!-- Settings Overlay -->
+    <div id="settings-overlay" class="settings-overlay hidden">
+      <!-- Settings panel will be dynamically created -->
+    </div>
+    
+  </div>
+  
+  <!-- Scripts -->
+  <script src="scripts/main.js"></script>
+  <script src="scripts/settings.js"></script>
+</body>
+</html>
+

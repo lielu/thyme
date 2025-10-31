@@ -1,0 +1,533 @@
+/* Thyme Kiosk Clock - Main Stylesheet */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'Arial', 'Helvetica', sans-serif;
+  color: white;
+  overflow: hidden;
+  background: black;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Background */
+.background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: -1;
+  transition: opacity 1s ease-in-out;
+}
+
+.background.fade-out {
+  opacity: 0;
+}
+
+/* Main App Container */
+.app-container {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+/* Shadow Text Effect */
+.shadow-text {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* Clock & Date - Top Right */
+.clock-container {
+  position: absolute;
+  top: 40px;
+  right: 40px;
+  text-align: right;
+  z-index: 10;
+}
+
+.clock {
+  font-size: 120px;
+  font-weight: bold;
+  line-height: 1;
+  letter-spacing: -2px;
+}
+
+.date {
+  font-size: 36px;
+  margin-top: 20px;
+  font-weight: 300;
+}
+
+/* Settings Icon */
+.settings-icon {
+  position: absolute;
+  top: 280px;
+  right: 70px;
+  font-size: 32px;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(51, 51, 51, 0.85);
+  border: 2px solid rgba(102, 102, 102, 0.8);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 100;
+  outline: none;
+}
+
+.settings-icon:hover {
+  background: rgba(85, 85, 85, 0.95);
+  border-color: rgba(136, 136, 136, 0.9);
+  transform: scale(1.1) rotate(45deg);
+}
+
+.settings-icon:active {
+  transform: scale(0.95) rotate(45deg);
+}
+
+/* Alarms - Top Left */
+.alarms-container {
+  position: absolute;
+  top: 40px;
+  left: 40px;
+  font-size: 24px;
+  max-width: 400px;
+  z-index: 10;
+}
+
+/* Discord - Middle Left */
+.discord-container {
+  position: absolute;
+  top: 50%;
+  left: 40px;
+  transform: translateY(-50%);
+  font-size: 28px;
+  max-width: 700px;
+  z-index: 10;
+}
+
+.discord-container #discord-messages {
+  max-height: 300px;
+  overflow: hidden;
+}
+
+/* Events - Bottom Left */
+.events-container {
+  position: absolute;
+  bottom: 40px;
+  left: 40px;
+  font-size: 32px;
+  max-width: 900px;
+  z-index: 10;
+}
+
+.section-title {
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+
+#alarms-list,
+#discord-messages,
+#events-list {
+  line-height: 1.5;
+}
+
+/* Weather - Bottom Right */
+.weather-container {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  z-index: 10;
+}
+
+.weather-text {
+  font-size: 32px;
+  font-weight: 500;
+}
+
+.weather-icon {
+  width: 64px;
+  height: 64px;
+  filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.8));
+}
+
+/* Alarm Overlay */
+.alarm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.alarm-message {
+  font-size: 96px;
+  font-weight: bold;
+  color: #ff3333;
+  text-shadow: 0 0 20px rgba(255, 51, 51, 0.8);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.9;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Settings Overlay */
+.settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease-in;
+}
+
+/* Settings Panel */
+.settings-panel {
+  background: #1e1e1e;
+  border-radius: 16px;
+  width: 900px;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.settings-header {
+  background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+  padding: 28px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.settings-title {
+  font-size: 28px;
+  font-weight: bold;
+  color: white;
+}
+
+.settings-close {
+  background: #e63946;
+  color: white;
+  border: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  font-size: 28px;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.settings-close:hover {
+  background: #f1495a;
+  transform: scale(1.05);
+}
+
+.settings-close:active {
+  transform: scale(0.95);
+}
+
+.settings-content {
+  padding: 32px;
+  overflow-y: auto;
+  flex: 1;
+  background: #252526;
+}
+
+.settings-content::-webkit-scrollbar {
+  width: 12px;
+}
+
+.settings-content::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+.settings-content::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 6px;
+}
+
+.settings-content::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+.settings-section {
+  margin-bottom: 36px;
+}
+
+.settings-section h3 {
+  color: #0078d4;
+  margin-bottom: 20px;
+  font-size: 20px;
+  border-bottom: 2px solid #0078d4;
+  padding-bottom: 8px;
+}
+
+.settings-field {
+  margin-bottom: 24px;
+}
+
+.settings-field label {
+  display: block;
+  margin-bottom: 10px;
+  color: #e8e8e8;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.settings-field input,
+.settings-field select {
+  width: 100%;
+  padding: 14px 16px;
+  background: #3c3c3c;
+  border: 2px solid #555555;
+  border-radius: 8px;
+  color: #e8e8e8;
+  font-size: 15px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+
+.settings-field input:focus,
+.settings-field select:focus {
+  outline: none;
+  border-color: #0078d4;
+  background: #454545;
+  box-shadow: 0 0 0 3px rgba(0, 120, 212, 0.1);
+}
+
+.settings-field input[type="password"] {
+  letter-spacing: 2px;
+}
+
+.settings-help-text {
+  font-size: 13px;
+  color: #9a9a9a;
+  margin-top: 6px;
+}
+
+.settings-footer {
+  padding: 24px 32px;
+  background: #1e1e1e;
+  display: flex;
+  justify-content: space-between;
+  border-top: 2px solid #3c3c3c;
+  flex-shrink: 0;
+}
+
+.btn {
+  padding: 14px 28px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: #0078d4;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #106ebe;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 120, 212, 0.4);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.btn-secondary {
+  background: #3c3c3c;
+  color: #e0e0e0;
+}
+
+.btn-secondary:hover {
+  background: #4a4a4a;
+}
+
+.btn-danger {
+  background: #e63946;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #f1495a;
+}
+
+/* Alarm Management */
+.alarms-list-container {
+  background: #2d2d30;
+  border: 2px solid #3c3c3c;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.alarm-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: #3c3c3c;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.alarm-item:last-child {
+  margin-bottom: 0;
+}
+
+.alarm-time {
+  font-size: 18px;
+  font-weight: 500;
+  color: #e8e8e8;
+}
+
+.alarm-delete {
+  background: #e63946;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+}
+
+.alarm-delete:hover {
+  background: #f1495a;
+}
+
+.alarm-add-form {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.alarm-add-form input {
+  flex: 1;
+}
+
+.alarm-add-form button {
+  flex-shrink: 0;
+}
+
+/* Utility Classes */
+.hidden {
+  display: none !important;
+}
+
+.mt-2 {
+  margin-top: 16px;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-muted {
+  color: #9a9a9a;
+}
+
+/* Responsive adjustments for smaller screens */
+@media (max-width: 1400px) {
+  .clock {
+    font-size: 90px;
+  }
+  
+  .date {
+    font-size: 28px;
+  }
+  
+  .events-container {
+    font-size: 28px;
+  }
+  
+  .discord-container {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 1024px) {
+  .clock {
+    font-size: 70px;
+  }
+  
+  .date {
+    font-size: 24px;
+  }
+  
+  .settings-panel {
+    width: 95vw;
+  }
+}
+

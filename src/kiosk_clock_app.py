@@ -241,193 +241,323 @@ class KioskClockApp:
         if self.settings_visible:
             return
         
-        # Calculate overlay dimensions and position
-        overlay_width = min(900, self.screen_width - 80)
-        overlay_height = min(700, self.screen_height - 80)
-        overlay_x = (self.screen_width - overlay_width) // 2
-        overlay_y = (self.screen_height - overlay_height) // 2
+        try:
+            # Calculate overlay dimensions and position
+            overlay_width = min(900, self.screen_width - 80)
+            overlay_height = min(700, self.screen_height - 80)
+            overlay_x = (self.screen_width - overlay_width) // 2
+            overlay_y = (self.screen_height - overlay_height) // 2
+            
+            # Create semi-transparent background with better opacity
+            bg_overlay = self.canvas.create_rectangle(
+                0, 0, self.screen_width, self.screen_height,
+                fill='black', stipple='gray12', outline=''
+            )
+            
+            # Create main settings frame with modern styling
+            self.settings_overlay_frame = tk.Frame(
+                self.canvas,
+                bg='#1a1a1a',
+                relief='flat',
+                bd=0
+            )
+            
+            # Embed frame in canvas
+            self.settings_overlay_window = self.canvas.create_window(
+                overlay_x + overlay_width//2,
+                overlay_y + overlay_height//2,
+                window=self.settings_overlay_frame,
+                width=overlay_width,
+                height=overlay_height
+            )
+            
+            # Create settings UI inside the frame
+            self._create_embedded_settings_ui()
+            
+            # Bind escape key to close
+            self.root.bind('<Escape>', self._hide_settings_overlay)
+            
+            # Store overlay elements for cleanup
+            self.settings_bg_overlay = bg_overlay
+            self.settings_visible = True
+            
+            # Focus on the overlay
+            self.settings_overlay_frame.focus_set()
+            
+            # Update display to ensure it's visible
+            self.root.update_idletasks()
+            
+        except Exception as e:
+            self.logger.error(f"Error creating settings overlay: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+            # Reset state on error
+            self.settings_visible = False
+            raise
+    
+    def _draw_rounded_rect(self, canvas, x1, y1, x2, y2, radius, fill):
+        """Draw a rounded rectangle on canvas."""
+        # Draw rectangles and circles to create rounded corners
+        canvas.create_rectangle(x1+radius, y1, x2-radius, y2, fill=fill, outline='')
+        canvas.create_rectangle(x1, y1+radius, x2, y2-radius, fill=fill, outline='')
         
-        # Create semi-transparent background with better opacity
-        bg_overlay = self.canvas.create_rectangle(
-            0, 0, self.screen_width, self.screen_height,
-            fill='black', stipple='gray12', outline=''
-        )
-        
-        # Create main settings frame with modern styling
-        self.settings_overlay_frame = tk.Frame(
-            self.canvas,
-            bg='#1a1a1a',
-            relief='flat',
-            bd=0
-        )
-        
-        # Embed frame in canvas
-        self.settings_overlay_window = self.canvas.create_window(
-            overlay_x + overlay_width//2,
-            overlay_y + overlay_height//2,
-            window=self.settings_overlay_frame,
-            width=overlay_width,
-            height=overlay_height
-        )
-        
-        # Create settings UI inside the frame
-        self._create_embedded_settings_ui()
-        
-        # Bind escape key to close
-        self.root.bind('<Escape>', self._hide_settings_overlay)
-        
-        # Store overlay elements for cleanup
-        self.settings_bg_overlay = bg_overlay
-        self.settings_visible = True
-        
-        # Focus on the overlay
-        self.settings_overlay_frame.focus_set()
+        # Draw rounded corners
+        canvas.create_oval(x1, y1, x1+radius*2, y1+radius*2, fill=fill, outline='')
+        canvas.create_oval(x2-radius*2, y1, x2, y1+radius*2, fill=fill, outline='')
+        canvas.create_oval(x1, y2-radius*2, x1+radius*2, y2, fill=fill, outline='')
+        canvas.create_oval(x2-radius*2, y2-radius*2, x2, y2, fill=fill, outline='')
     
     def _create_embedded_settings_ui(self):
-        """Create the settings UI inside the embedded frame."""
-        # Create modern shadow effect frame
-        shadow_frame = tk.Frame(self.settings_overlay_frame, bg='#000000', bd=0)
-        shadow_frame.place(x=8, y=8, relwidth=1, relheight=1)
-        
-        main_frame = tk.Frame(self.settings_overlay_frame, bg='#2d2d2d', bd=2, relief='solid')
-        main_frame.place(x=0, y=0, relwidth=1, relheight=1)
-        
-        # Modern title bar with gradient effect
-        title_frame = tk.Frame(main_frame, bg='#0066cc', height=50)
-        title_frame.pack(fill='x', side='top')
-        title_frame.pack_propagate(False)
-        
-        # Title with icon
-        title_label = tk.Label(
-            title_frame, 
-            text="⚙️  Kiosk Clock Settings",
-            font=('Segoe UI', 18, 'bold'),
-            fg='white', 
-            bg='#0066cc'
-        )
-        title_label.pack(side='left', padx=20, pady=12)
-        
-        # Modern close button
-        close_btn = tk.Button(
-            title_frame,
-            text="✕",
-            font=('Segoe UI', 20, 'bold'),
-            fg='white',
-            bg='#ff4444',
-            activebackground='#ff6666',
-            activeforeground='white',
-            bd=0,
-            width=6,
-            height=2,
-            cursor='hand2',
-            command=self._hide_settings_overlay
-        )
-        close_btn.pack(side='right', padx=20, pady=10)
-        
-        # Create scrollable content area with better styling
-        content_frame = tk.Frame(main_frame, bg='#2d2d2d')
-        content_frame.pack(fill='both', expand=True, padx=15, pady=15)
-        
-        # Create modern notebook for tabs
-        from tkinter import ttk
-        style = ttk.Style()
-        style.theme_use('clam')
-        
-        # Configure modern tab styling with larger tabs
-        style.configure('Modern.TNotebook', 
-                       background='#2d2d2d',
-                       borderwidth=0,
-                       tabmargins=[0, 0, 0, 0])
-        
-        style.configure('Modern.TNotebook.Tab', 
-                       background='#404040',
-                       foreground='white',
-                       padding=[30, 18],
-                       font=('Segoe UI', 12, 'bold'),
-                       borderwidth=0)
-        
-        style.map('Modern.TNotebook.Tab', 
-                 background=[('selected', '#0066cc'), ('active', '#555555')],
-                 foreground=[('selected', 'white'), ('active', 'white')])
-        
-        self.settings_notebook = ttk.Notebook(content_frame, style='Modern.TNotebook')
-        self.settings_notebook.pack(fill='both', expand=True, pady=(0, 20))
-        
-        # Load current settings
-        current_settings = self.settings_manager._load_current_settings()
-        
-        # Create styled tabs
-        self._create_quick_settings_tab(current_settings)
-        self._create_alarms_settings_tab(current_settings)
-        self._create_advanced_settings_tab(current_settings)
-        
-        # Modern button frame with larger buttons
-        button_frame = tk.Frame(main_frame, bg='#333333', height=80)
-        button_frame.pack(fill='x', side='bottom')
-        button_frame.pack_propagate(False)
-        
-        # Modern action buttons - much larger and easier to click
-        save_btn = tk.Button(
-            button_frame,
-            text="💾 Save & Apply",
-            font=('Segoe UI', 14, 'bold'),
-            fg='white',
-            bg='#28a745',
-            activebackground='#34ce57',
-            activeforeground='white',
-            bd=0,
-            padx=40,
-            pady=20,
-            cursor='hand2',
-            command=self._save_embedded_settings
-        )
-        save_btn.pack(side='right', padx=20, pady=20)
-        
-        # Cancel button with larger size
-        cancel_btn = tk.Button(
-            button_frame,
-            text="Cancel",
-            font=('Segoe UI', 14),
-            fg='white',
-            bg='#6c757d',
-            activebackground='#868e96',
-            activeforeground='white',
-            bd=0,
-            padx=40,
-            pady=20,
-            cursor='hand2',
-            command=self._hide_settings_overlay
-        )
-        cancel_btn.pack(side='right', padx=10, pady=20)
-        
-        # Reset button with larger size
-        reset_btn = tk.Button(
-            button_frame,
-            text="🔄 Reset",
-            font=('Segoe UI', 14),
-            fg='white',
-            bg='#dc3545',
-            activebackground='#e4606d',
-            activeforeground='white',
-            bd=0,
-            padx=35,
-            pady=20,
-            cursor='hand2',
-            command=self._reset_settings
-        )
-        reset_btn.pack(side='left', padx=20, pady=20)
+        """Create the settings UI inside the embedded frame with rounded corners."""
+        try:
+            # Create canvas for rounded corners background
+            rounded_canvas = tk.Canvas(
+                self.settings_overlay_frame,
+                bg='#0a0a0a',
+                highlightthickness=0,
+                bd=0
+            )
+            rounded_canvas.place(x=0, y=0, relwidth=1, relheight=1)
+            
+            # Draw rounded rectangle background
+            def draw_rounded_bg(event=None):
+                w = rounded_canvas.winfo_width()
+                h = rounded_canvas.winfo_height()
+                if w > 1 and h > 1:
+                    rounded_canvas.delete("all")
+                    radius = 16  # Rounded corner radius
+                    
+                    # Draw shadow
+                    shadow_offset = 12
+                    self._draw_rounded_rect(rounded_canvas, shadow_offset, shadow_offset, 
+                                          w-shadow_offset, h-shadow_offset, radius, '#000000')
+                    
+                    # Draw main background
+                    self._draw_rounded_rect(rounded_canvas, 0, 0, w, h, radius, '#1e1e1e')
+            
+            rounded_canvas.bind('<Configure>', draw_rounded_bg)
+            self.settings_overlay_frame.update_idletasks()
+            draw_rounded_bg()
+            
+            # Create main frame on top of canvas
+            main_frame = tk.Frame(self.settings_overlay_frame, bg='#1e1e1e', bd=0, relief='flat')
+            main_frame.place(x=0, y=0, relwidth=1, relheight=1)
+            
+            # Polished title bar with gradient-like effect
+            title_frame = tk.Frame(main_frame, bg='#0078d4', height=64)
+            title_frame.pack(fill='x', side='top')
+            title_frame.pack_propagate(False)
+            
+            # Title section with icon and description
+            title_left = tk.Frame(title_frame, bg='#0078d4')
+            title_left.pack(side='left', fill='both', expand=True, padx=28, pady=16)
+            
+            title_label = tk.Label(
+                title_left, 
+                text="⚙️  Settings",
+                font=('Segoe UI', 18, 'bold'),
+                fg='white', 
+                bg='#0078d4',
+                anchor='w'
+            )
+            title_label.pack(anchor='w')
+            
+            subtitle_label = tk.Label(
+                title_left,
+                text="Configure your Kiosk Clock",
+                font=('Segoe UI', 10),
+                fg='#d4e9ff',
+                bg='#0078d4',
+                anchor='w'
+            )
+            subtitle_label.pack(anchor='w', pady=(4, 0))
+            
+            # Polished close button with rounded look
+            close_frame = tk.Frame(title_frame, bg='#0078d4')
+            close_frame.pack(side='right', padx=20, pady=16)
+            
+            close_btn = tk.Button(
+                close_frame,
+                text="✕",
+                font=('Segoe UI', 18, 'bold'),
+                fg='white',
+                bg='#e63946',
+                activebackground='#f1495a',
+                activeforeground='white',
+                bd=0,
+                width=2,
+                height=1,
+                cursor='hand2',
+                command=self._hide_settings_overlay,
+                relief='flat',
+                padx=14,
+                pady=8
+            )
+            close_btn.pack()
+            
+            # Add hover effects
+            def on_close_enter(e):
+                close_btn.config(bg='#f1495a')
+            def on_close_leave(e):
+                close_btn.config(bg='#e63946')
+            close_btn.bind('<Enter>', on_close_enter)
+            close_btn.bind('<Leave>', on_close_leave)
+            
+            # Create scrollable content area with refined styling
+            content_frame = tk.Frame(main_frame, bg='#252526')
+            content_frame.pack(fill='both', expand=True, padx=24, pady=(0, 0))
+            
+            # Create modern notebook for tabs with refined styling
+            from tkinter import ttk
+            style = ttk.Style()
+            style.theme_use('clam')
+            
+            # Configure polished tab styling
+            style.configure('Modern.TNotebook', 
+                           background='#252526',
+                           borderwidth=0,
+                           tabmargins=[2, 4, 2, 0])
+            
+            # Well-proportioned tabs with rounded appearance
+            style.configure('Modern.TNotebook.Tab', 
+                           background='#3c3c3c',
+                           foreground='#cccccc',
+                           padding=[24, 12],
+                           font=('Segoe UI', 10, 'bold'),
+                           borderwidth=0)
+            
+            style.map('Modern.TNotebook.Tab', 
+                     background=[('selected', '#0078d4'), ('active', '#4a4a4a')],
+                     foreground=[('selected', 'white'), ('active', '#ffffff')],
+                     padding=[('selected', [26, 14])])
+            
+            # Notebook container with refined spacing
+            notebook_container = tk.Frame(content_frame, bg='#252526')
+            notebook_container.pack(fill='both', expand=True, pady=(16, 16))
+            
+            self.settings_notebook = ttk.Notebook(notebook_container, style='Modern.TNotebook')
+            self.settings_notebook.pack(fill='both', expand=True, padx=4, pady=0)
+            
+            # Load current settings
+            current_settings = self.settings_manager._load_current_settings()
+            
+            # Create styled tabs
+            self._create_quick_settings_tab(current_settings)
+            self._create_alarms_settings_tab(current_settings)
+            self._create_advanced_settings_tab(current_settings)
+            
+            # Polished button frame with better spacing
+            button_frame = tk.Frame(main_frame, bg='#1e1e1e', height=80)
+            button_frame.pack(fill='x', side='bottom')
+            button_frame.pack_propagate(False)
+            
+            # Separator line
+            separator = tk.Frame(button_frame, bg='#3c3c3c', height=1)
+            separator.pack(fill='x', side='top')
+            
+            # Left side buttons
+            left_buttons = tk.Frame(button_frame, bg='#1e1e1e')
+            left_buttons.pack(side='left', padx=28, pady=20)
+            
+            # Polished reset button with rounded appearance
+            reset_btn = tk.Button(
+                left_buttons,
+                text="🔄 Reset",
+                font=('Segoe UI', 10, 'bold'),
+                fg='white',
+                bg='#e63946',
+                activebackground='#f1495a',
+                activeforeground='white',
+                bd=0,
+                padx=20,
+                pady=9,
+                cursor='hand2',
+                command=self._reset_settings,
+                relief='flat'
+            )
+            reset_btn.pack(side='left')
+            
+            # Add hover effect
+            def on_reset_enter(e):
+                reset_btn.config(bg='#f1495a')
+            def on_reset_leave(e):
+                reset_btn.config(bg='#e63946')
+            reset_btn.bind('<Enter>', on_reset_enter)
+            reset_btn.bind('<Leave>', on_reset_leave)
+            
+            # Right side buttons
+            right_buttons = tk.Frame(button_frame, bg='#1e1e1e')
+            right_buttons.pack(side='right', padx=28, pady=20)
+            
+            # Polished cancel button
+            cancel_btn = tk.Button(
+                right_buttons,
+                text="Cancel",
+                font=('Segoe UI', 10, 'bold'),
+                fg='#e0e0e0',
+                bg='#3c3c3c',
+                activebackground='#4a4a4a',
+                activeforeground='white',
+                bd=0,
+                padx=22,
+                pady=9,
+                cursor='hand2',
+                command=self._hide_settings_overlay,
+                relief='flat'
+            )
+            cancel_btn.pack(side='right', padx=(0, 10))
+            
+            # Add hover effect
+            def on_cancel_enter(e):
+                cancel_btn.config(bg='#4a4a4a')
+            def on_cancel_leave(e):
+                cancel_btn.config(bg='#3c3c3c')
+            cancel_btn.bind('<Enter>', on_cancel_enter)
+            cancel_btn.bind('<Leave>', on_cancel_leave)
+            
+            # Polished save button with emphasis
+            save_btn = tk.Button(
+                right_buttons,
+                text="💾 Save & Apply",
+                font=('Segoe UI', 11, 'bold'),
+                fg='white',
+                bg='#0078d4',
+                activebackground='#106ebe',
+                activeforeground='white',
+                bd=0,
+                padx=26,
+                pady=9,
+                cursor='hand2',
+                command=self._save_embedded_settings,
+                relief='flat'
+            )
+            save_btn.pack(side='right')
+            
+            # Add hover effect
+            def on_save_enter(e):
+                save_btn.config(bg='#106ebe')
+            def on_save_leave(e):
+                save_btn.config(bg='#0078d4')
+            save_btn.bind('<Enter>', on_save_enter)
+            save_btn.bind('<Leave>', on_save_leave)
+            
+        except Exception as e:
+            self.logger.error(f"Error creating embedded settings UI: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+            raise
     
     def _create_quick_settings_tab(self, settings):
         """Create a quick settings tab with the most common options."""
-        frame = tk.Frame(self.settings_notebook, bg='#2d2d2d')
+        frame = tk.Frame(self.settings_notebook, bg='#1e1e1e')
         self.settings_notebook.add(frame, text="⚡ Quick Setup")
         
-        # Scrollable frame with modern styling
-        canvas = tk.Canvas(frame, bg='#2d2d2d', highlightthickness=0, bd=0)
+        # Scrollable frame with improved styling
+        canvas = tk.Canvas(frame, bg='#1e1e1e', highlightthickness=0, bd=0)
         scrollbar = tk.Scrollbar(frame, orient="vertical", command=canvas.yview, 
-                               bg='#404040', troughcolor='#2d2d2d', 
-                               activebackground='#555555')
-        scrollable_frame = tk.Frame(canvas, bg='#2d2d2d')
+                               bg='#3c3c3c', troughcolor='#1e1e1e', 
+                               activebackground='#505050', width=12)
+        scrollable_frame = tk.Frame(canvas, bg='#1e1e1e')
         
         scrollable_frame.bind(
             "<Configure>",
@@ -440,121 +570,137 @@ class KioskClockApp:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        # Calendar Section
+        # Calendar Section with help text
         self._create_settings_section(scrollable_frame, "📅 Google Calendar", [
-            ("Calendar ID (your email):", "calendar_id", settings['calendar_id'], "entry")
+            ("Calendar ID:", "calendar_id", settings['calendar_id'], "entry", 
+             "Your Gmail address or calendar ID")
         ])
         
-        # Discord Section
+        # Discord Section with help text
         self._create_settings_section(scrollable_frame, "💬 Discord Integration", [
-            ("Bot Token:", "discord_token", settings['discord_token'], "password"),
-            ("Channel ID:", "discord_channel_id", settings['discord_channel_id'], "entry")
+            ("Bot Token:", "discord_token", settings['discord_token'], "password",
+             "Get from Discord Developer Portal"),
+            ("Channel ID:", "discord_channel_id", settings['discord_channel_id'], "entry",
+             "Enable Developer Mode in Discord to copy")
         ])
         
-        # Location Section
+        # Location Section with help text
         self._create_settings_section(scrollable_frame, "🌍 Location & Weather", [
-            ("Latitude:", "latitude", settings['latitude'], "entry"),
-            ("Longitude:", "longitude", settings['longitude'], "entry"),
-            ("Temperature Unit:", "temp_unit", settings['temp_unit'], "radio", ["fahrenheit", "celsius"])
+            ("Latitude:", "latitude", settings['latitude'], "entry",
+             "Decimal format, e.g., 32.7767"),
+            ("Longitude:", "longitude", settings['longitude'], "entry",
+             "Decimal format, e.g., -96.7970"),
+            ("Temperature Unit:", "temp_unit", settings['temp_unit'], "radio", 
+             ["fahrenheit", "celsius"], "Preferred temperature display")
         ])
     
     def _create_alarms_settings_tab(self, settings):
         """Create alarms management tab."""
-        frame = tk.Frame(self.settings_notebook, bg='#2d2d2d')
+        frame = tk.Frame(self.settings_notebook, bg='#1e1e1e')
         self.settings_notebook.add(frame, text="⏰ Alarms")
         
-        # Header section
-        header_frame = tk.Frame(frame, bg='#2d2d2d')
-        header_frame.pack(fill='x', padx=25, pady=20)
+        # Header section with improved styling
+        header_frame = tk.Frame(frame, bg='#1e1e1e')
+        header_frame.pack(fill='x', padx=30, pady=25)
         
-        tk.Label(header_frame, text="⏰ Alarm Times", 
-                font=('Segoe UI', 16, 'bold'), 
-                fg='white', bg='#2d2d2d').pack(anchor='w')
+        title_label = tk.Label(header_frame, text="⏰ Alarm Times", 
+                font=('Segoe UI', 16, 'bold'),  # Reduced from 18
+                fg='white', bg='#1e1e1e')
+        title_label.pack(anchor='w')
         
-        tk.Label(header_frame, text="Configure when the kiosk should wake you up", 
-                font=('Segoe UI', 10), 
-                fg='#cccccc', bg='#2d2d2d').pack(anchor='w', pady=(5,0))
+        subtitle_label = tk.Label(header_frame, text="Configure when the kiosk should wake you up", 
+                font=('Segoe UI', 10),  # Reduced from 11
+                fg='#a0a0a0', bg='#1e1e1e')
+        subtitle_label.pack(anchor='w', pady=(5, 0))
         
-        # Alarms listbox with modern styling
-        list_frame = tk.Frame(frame, bg='#2d2d2d')
-        list_frame.pack(fill='both', expand=True, padx=25, pady=(0, 20))
+        # Alarms listbox with improved styling
+        list_frame = tk.Frame(frame, bg='#1e1e1e')
+        list_frame.pack(fill='both', expand=True, padx=30, pady=(0, 25))
         
-        # Listbox container with border
-        listbox_container = tk.Frame(list_frame, bg='#404040', bd=1, relief='solid')
+        # Listbox container with improved border and styling
+        listbox_container = tk.Frame(list_frame, bg='#3c3c3c', bd=1, relief='solid')
         listbox_container.pack(fill='both', expand=True)
         
         self.alarms_listbox = tk.Listbox(
             listbox_container, 
-            height=8, 
-            font=('Segoe UI', 12),
-            bg='#404040',
-            fg='white',
-            selectbackground='#0066cc',
+            height=10, 
+            font=('Segoe UI', 11),  # Reduced from 13
+            bg='#2d2d30',
+            fg='#e0e0e0',
+            selectbackground='#0078d4',
             selectforeground='white',
             bd=0,
             highlightthickness=0,
-            activestyle='none'
+            activestyle='none',
+            relief='flat'
         )
         alarms_scrollbar = tk.Scrollbar(listbox_container, orient="vertical", 
                                       command=self.alarms_listbox.yview,
-                                      bg='#404040', troughcolor='#2d2d2d')
+                                      bg='#3c3c3c', troughcolor='#1e1e1e',
+                                      activebackground='#505050', width=12)
         self.alarms_listbox.configure(yscrollcommand=alarms_scrollbar.set)
         
-        self.alarms_listbox.pack(side="left", fill="both", expand=True, padx=10, pady=10)
-        alarms_scrollbar.pack(side="right", fill="y", padx=(0,5), pady=10)
+        self.alarms_listbox.pack(side="left", fill="both", expand=True, padx=15, pady=15)
+        alarms_scrollbar.pack(side="right", fill="y", padx=(0, 8), pady=15)
         
         # Populate alarms
         for alarm in settings['alarms']:
             self.alarms_listbox.insert(tk.END, alarm)
         
-        # Modern control buttons
-        controls_frame = tk.Frame(frame, bg='#2d2d2d')
-        controls_frame.pack(fill='x', padx=25, pady=(0, 20))
+        # Modern control buttons with improved styling
+        controls_frame = tk.Frame(frame, bg='#1e1e1e')
+        controls_frame.pack(fill='x', padx=30, pady=(0, 25))
         
-        # Action buttons with larger sizing for easier clicking
+        # Refined action buttons
         add_btn = tk.Button(controls_frame, text="➕ Add Alarm", command=self._add_alarm_embedded,
-                           bg='#28a745', fg='white', font=('Segoe UI', 12, 'bold'),
-                           bd=0, padx=30, pady=15, cursor='hand2')
-        add_btn.pack(side='left', padx=(0, 15))
+                           bg='#107c10', fg='white', font=('Segoe UI', 10, 'bold'),  # Reduced from 12
+                           bd=0, padx=20, pady=10, cursor='hand2', relief='flat',
+                           activebackground='#0e6e0e', activeforeground='white')
+        add_btn.pack(side='left', padx=(0, 10))
         
         edit_btn = tk.Button(controls_frame, text="✏️ Edit Selected", command=self._edit_alarm_embedded,
-                            bg='#ffc107', fg='black', font=('Segoe UI', 12, 'bold'),
-                            bd=0, padx=30, pady=15, cursor='hand2')
-        edit_btn.pack(side='left', padx=(0, 15))
+                            bg='#ff9800', fg='white', font=('Segoe UI', 10, 'bold'),  # Reduced from 12
+                            bd=0, padx=20, pady=10, cursor='hand2', relief='flat',
+                            activebackground='#fb8c00', activeforeground='white')
+        edit_btn.pack(side='left', padx=(0, 10))
         
         delete_btn = tk.Button(controls_frame, text="🗑️ Delete Selected", command=self._delete_alarm_embedded,
-                              bg='#dc3545', fg='white', font=('Segoe UI', 12, 'bold'),
-                              bd=0, padx=30, pady=15, cursor='hand2')
+                              bg='#d32f2f', fg='white', font=('Segoe UI', 10, 'bold'),  # Reduced from 12
+                              bd=0, padx=20, pady=10, cursor='hand2', relief='flat',
+                              activebackground='#f44336', activeforeground='white')
         delete_btn.pack(side='left')
         
-        # Quick add section with larger buttons
-        quick_frame = tk.Frame(frame, bg='#333333', bd=1, relief='solid')
-        quick_frame.pack(fill='x', padx=25, pady=(0, 20))
+        # Quick add section with refined styling
+        quick_frame = tk.Frame(frame, bg='#2d2d30', bd=1, relief='solid')
+        quick_frame.pack(fill='x', padx=30, pady=(0, 25))
         
-        tk.Label(quick_frame, text="Quick Add Common Times:", 
-                font=('Segoe UI', 12, 'bold'), 
-                fg='white', bg='#333333').pack(anchor='w', padx=20, pady=(15, 10))
+        quick_label = tk.Label(quick_frame, text="Quick Add Common Times:", 
+                font=('Segoe UI', 11, 'bold'),  # Reduced from 13
+                fg='white', bg='#2d2d30')
+        quick_label.pack(anchor='w', padx=18, pady=(16, 10))
         
-        buttons_frame = tk.Frame(quick_frame, bg='#333333')
-        buttons_frame.pack(fill='x', padx=20, pady=(0, 15))
+        buttons_frame = tk.Frame(quick_frame, bg='#2d2d30')
+        buttons_frame.pack(fill='x', padx=18, pady=(0, 16))
         
         for time_str in ["06:30", "07:00", "07:30", "08:00"]:
             quick_btn = tk.Button(buttons_frame, text=time_str, 
                                  command=lambda t=time_str: self._quick_add_alarm(t),
-                                 bg='#0066cc', fg='white', font=('Segoe UI', 12, 'bold'),
-                                 bd=0, padx=20, pady=12, cursor='hand2')
-            quick_btn.pack(side='left', padx=(0, 15))
+                                 bg='#0078d4', fg='white', font=('Segoe UI', 10, 'bold'),  # Reduced from 12
+                                 bd=0, padx=18, pady=8, cursor='hand2', relief='flat',
+                                 activebackground='#106ebe', activeforeground='white')
+            quick_btn.pack(side='left', padx=(0, 10))
     
     def _create_advanced_settings_tab(self, settings):
         """Create advanced settings tab."""
-        frame = tk.Frame(self.settings_notebook, bg='#2d2d2d')
+        frame = tk.Frame(self.settings_notebook, bg='#1e1e1e')
         self.settings_notebook.add(frame, text="🔧 Advanced")
         
-        # Scrollable frame
-        canvas = tk.Canvas(frame, bg='#2d2d2d', highlightthickness=0, bd=0)
+        # Scrollable frame with improved styling
+        canvas = tk.Canvas(frame, bg='#1e1e1e', highlightthickness=0, bd=0)
         scrollbar = tk.Scrollbar(frame, orient="vertical", command=canvas.yview,
-                               bg='#404040', troughcolor='#2d2d2d')
-        scrollable_frame = tk.Frame(canvas, bg='#2d2d2d')
+                               bg='#3c3c3c', troughcolor='#1e1e1e',
+                               activebackground='#505050', width=12)
+        scrollable_frame = tk.Frame(canvas, bg='#1e1e1e')
         
         scrollable_frame.bind(
             "<Configure>",
@@ -567,95 +713,151 @@ class KioskClockApp:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        # Display Schedule Section
+        # Display Schedule Section with help text
         self._create_settings_section(scrollable_frame, "📺 Display Schedule", [
-            ("Turn display OFF at:", "display_off_time", settings['display_off_time'], "entry"),
-            ("Turn display ON at:", "display_on_time", settings['display_on_time'], "entry")
+            ("Turn display OFF at:", "display_off_time", settings['display_off_time'], "entry",
+             "24-hour format (HH:MM), e.g., 23:00"),
+            ("Turn display ON at:", "display_on_time", settings['display_on_time'], "entry",
+             "24-hour format (HH:MM), e.g., 07:00")
         ])
         
-        # Timezone Section
+        # Timezone Section with help text
         self._create_settings_section(scrollable_frame, "🌍 Timezone", [
             ("Timezone:", "timezone", settings['timezone'], "combo", 
              ['America/New_York', 'America/Chicago', 'America/Denver', 'America/Los_Angeles',
-              'America/Toronto', 'Europe/London', 'Europe/Paris', 'Asia/Tokyo'])
+              'America/Toronto', 'Europe/London', 'Europe/Paris', 'Europe/Berlin',
+              'Asia/Tokyo', 'Asia/Shanghai', 'Australia/Sydney'],
+             "Select your timezone")
         ])
     
     def _create_settings_section(self, parent, title, fields):
         """Create a settings section with modern styling."""
-        # Section container with modern card design
-        section_container = tk.Frame(parent, bg='#2d2d2d')
-        section_container.pack(fill='x', padx=20, pady=15)
+        # Section container with polished card design
+        section_container = tk.Frame(parent, bg='#1e1e1e')
+        section_container.pack(fill='x', padx=20, pady=14)
         
-        # Section title with modern styling
-        title_frame = tk.Frame(section_container, bg='#0066cc', height=40)
+        # Section title with polished styling
+        title_frame = tk.Frame(section_container, bg='#0078d4', height=42)
         title_frame.pack(fill='x')
         title_frame.pack_propagate(False)
         
-        tk.Label(title_frame, text=title, font=('Segoe UI', 14, 'bold'), 
-                fg='white', bg='#0066cc').pack(anchor='w', padx=20, pady=10)
+        tk.Label(title_frame, text=title, font=('Segoe UI', 12, 'bold'),
+                fg='white', bg='#0078d4').pack(anchor='w', padx=18, pady=11)
         
-        # Section content with card styling
-        content_frame = tk.Frame(section_container, bg='#3d3d3d', bd=1, relief='solid')
+        # Section content with polished card styling
+        content_frame = tk.Frame(section_container, bg='#2d2d30', bd=0, relief='flat')
         content_frame.pack(fill='x')
         
         # Store field variables
         if not hasattr(self, 'settings_vars'):
             self.settings_vars = {}
         
-        for field_label, field_key, field_value, field_type, *field_options in fields:
-            field_frame = tk.Frame(content_frame, bg='#3d3d3d')
-            field_frame.pack(fill='x', padx=20, pady=15)
+        for field_data in fields:
+            # Parse field data (supports both old and new format with help text)
+            if len(field_data) >= 4:
+                field_label = field_data[0]
+                field_key = field_data[1]
+                field_value = field_data[2]
+                field_type = field_data[3]
+                field_options = field_data[4] if len(field_data) > 4 else []
+                help_text = field_data[5] if len(field_data) > 5 else None
+            else:
+                # Legacy format support
+                field_label, field_key, field_value, field_type = field_data[:4]
+                field_options = field_data[4] if len(field_data) > 4 else []
+                help_text = None
             
-            # Label with modern styling
-            label = tk.Label(field_frame, text=field_label, font=('Segoe UI', 12), 
-                           fg='white', bg='#3d3d3d', width=25, anchor='w')
-            label.pack(side='left')
+            field_frame = tk.Frame(content_frame, bg='#2d2d30')
+            field_frame.pack(fill='x', padx=18, pady=14)
             
-            # Create appropriate widget with modern styling and larger sizes
+            # Left side: Label and help text
+            left_frame = tk.Frame(field_frame, bg='#2d2d30')
+            left_frame.pack(side='left', fill='y')
+            
+            # Label with polished styling
+            label = tk.Label(left_frame, text=field_label, font=('Segoe UI', 10, 'bold'),
+                           fg='#e8e8e8', bg='#2d2d30', anchor='w', width=20)
+            label.pack(anchor='w')
+            
+            # Help text if provided
+            if help_text:
+                help_label = tk.Label(left_frame, text=help_text, font=('Segoe UI', 9),
+                                    fg='#9a9a9a', bg='#2d2d30', anchor='w', width=20)
+                help_label.pack(anchor='w', pady=(3, 0))
+            
+            # Right side: Input widget
+            widget_frame = tk.Frame(field_frame, bg='#2d2d30')
+            widget_frame.pack(side='left', fill='x', expand=True, padx=(20, 0))
+            
+            # Create appropriate widget with polished styling
             if field_type == "entry":
                 var = tk.StringVar(value=field_value)
-                entry = tk.Entry(field_frame, textvariable=var, font=('Segoe UI', 12), 
-                               bg='#555555', fg='white', insertbackground='white',
-                               bd=0, relief='flat')
-                entry.pack(side='left', fill='x', expand=True, padx=(15,0), ipady=10)
+                entry = tk.Entry(widget_frame, textvariable=var, font=('Segoe UI', 10),
+                               bg='#3c3c3c', fg='#e8e8e8', insertbackground='#0078d4',
+                               bd=0, relief='flat', highlightthickness=2,
+                               highlightbackground='#555555', highlightcolor='#0078d4')
+                entry.pack(side='left', fill='x', expand=True, ipady=8, ipadx=12)
                 self.settings_vars[field_key] = var
+                
+                # Add polished focus effects
+                def on_focus_in(event):
+                    entry.config(highlightbackground='#0078d4', bg='#454545')
+                def on_focus_out(event):
+                    entry.config(highlightbackground='#555555', bg='#3c3c3c')
+                entry.bind('<FocusIn>', on_focus_in)
+                entry.bind('<FocusOut>', on_focus_out)
                 
             elif field_type == "password":
                 var = tk.StringVar(value=field_value)
-                entry = tk.Entry(field_frame, textvariable=var, show='*', font=('Segoe UI', 12), 
-                               bg='#555555', fg='white', insertbackground='white',
-                               bd=0, relief='flat')
-                entry.pack(side='left', fill='x', expand=True, padx=(15,0), ipady=10)
+                entry = tk.Entry(widget_frame, textvariable=var, show='*', font=('Segoe UI', 10),
+                               bg='#3c3c3c', fg='#e8e8e8', insertbackground='#0078d4',
+                               bd=0, relief='flat', highlightthickness=2,
+                               highlightbackground='#555555', highlightcolor='#0078d4')
+                entry.pack(side='left', fill='x', expand=True, ipady=8, ipadx=12)
                 self.settings_vars[field_key] = var
+                
+                # Add polished focus effects
+                def on_focus_in(event):
+                    entry.config(highlightbackground='#0078d4', bg='#454545')
+                def on_focus_out(event):
+                    entry.config(highlightbackground='#555555', bg='#3c3c3c')
+                entry.bind('<FocusIn>', on_focus_in)
+                entry.bind('<FocusOut>', on_focus_out)
                 
             elif field_type == "radio" and field_options:
                 var = tk.StringVar(value=field_value)
-                radio_frame = tk.Frame(field_frame, bg='#3d3d3d')
-                radio_frame.pack(side='left', fill='x', expand=True, padx=(15,0))
-                for option in field_options[0]:
+                radio_frame = tk.Frame(widget_frame, bg='#2d2d30')
+                radio_frame.pack(side='left', fill='x', expand=True)
+                for option in field_options if isinstance(field_options, list) else [field_options]:
                     radio = tk.Radiobutton(radio_frame, text=option.title(), variable=var, value=option,
-                                         fg='white', bg='#3d3d3d', selectcolor='#0066cc',
-                                         font=('Segoe UI', 11), activebackground='#3d3d3d',
-                                         activeforeground='white', cursor='hand2')
-                    radio.pack(side='left', padx=20, pady=8)
+                                         fg='#e8e8e8', bg='#2d2d30', selectcolor='#0078d4',
+                                         font=('Segoe UI', 10), activebackground='#2d2d30',
+                                         activeforeground='#e8e8e8', cursor='hand2',
+                                         borderwidth=0, highlightthickness=0)
+                    radio.pack(side='left', padx=(0, 18), pady=7)
                 self.settings_vars[field_key] = var
                 
             elif field_type == "combo" and field_options:
                 var = tk.StringVar(value=field_value)
                 from tkinter import ttk
                 
-                # Configure combobox style with larger size
+                # Configure combobox style with polished appearance
                 style = ttk.Style()
                 style.configure('Modern.TCombobox',
-                               fieldbackground='#555555',
-                               background='#555555',
-                               foreground='white',
+                               fieldbackground='#3c3c3c',
+                               background='#3c3c3c',
+                               foreground='#e8e8e8',
                                borderwidth=0,
-                               relief='flat')
+                               relief='flat',
+                               padding=8)
+                style.map('Modern.TCombobox',
+                         fieldbackground=[('readonly', '#3c3c3c'), ('focus', '#454545')],
+                         background=[('readonly', '#3c3c3c')])
                 
-                combo = ttk.Combobox(field_frame, textvariable=var, values=field_options[0],
-                                   font=('Segoe UI', 12), width=35, style='Modern.TCombobox')
-                combo.pack(side='left', padx=(15,0), ipady=8)
+                combo = ttk.Combobox(widget_frame, textvariable=var, values=field_options,
+                                   font=('Segoe UI', 10), width=40, style='Modern.TCombobox',
+                                   state='readonly')
+                combo.pack(side='left', ipady=7)
                 self.settings_vars[field_key] = var
     
     def _hide_settings_overlay(self, event=None):
@@ -1127,6 +1329,14 @@ class KioskClockApp:
             
         except Exception as e:
             self.logger.error(f"Error opening settings: {e}")
+            import traceback
+            self.logger.error(traceback.format_exc())
+            # Try to show error to user
+            try:
+                from tkinter import messagebox
+                messagebox.showerror("Settings Error", f"Failed to open settings: {str(e)}")
+            except:
+                pass
     
     def _reset_settings(self):
         """Reset all settings to defaults."""
